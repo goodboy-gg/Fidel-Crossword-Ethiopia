@@ -7,7 +7,7 @@ import '../screens/home_screen.dart';
 import '../screens/levels_screen.dart';
 
 import '../screens/splash_screen.dart';
-
+import '../screens/crossword_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -52,15 +52,9 @@ class AppRouter {
 
         return MaterialPageRoute(
 
-          builder: (_) => const PlaceholderScreen(
+          builder: (_) => const CrosswordScreen(),
 
-            title: 'Crossword',
-
-            message: 'The crossword game is being prepared.',
-
-            icon: Icons.grid_4x4_rounded,
-
-          ),
+            
 
           settings: settings,
 
