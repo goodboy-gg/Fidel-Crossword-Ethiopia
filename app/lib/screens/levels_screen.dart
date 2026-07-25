@@ -2,13 +2,135 @@ import 'package:flutter/material.dart';
 
 import '../app/app_routes.dart';
 
-class LevelsScreen extends StatelessWidget {
+import '../game_progress.dart';
+
+class LevelsScreen extends StatefulWidget {
 
   const LevelsScreen({super.key});
 
   @override
 
+  State<LevelsScreen> createState() => _LevelsScreenState();
+
+}
+
+class _LevelsScreenState extends State<LevelsScreen> {
+
+  bool _isLoading = true;
+
+  @override
+
+  void initState() {
+
+    super.initState();
+
+    _prepareLevels();
+
+  }
+
+  Future<void> _prepareLevels() async {
+
+    await GameProgress.unlockAllLevels();
+
+    if (!mounted) {
+
+      return;
+
+    }
+
+    setState(() {
+
+      _isLoading = false;
+
+    });
+
+  }
+
+  void _openLevel(BuildContext context, int level) {
+
+    if (!GameProgress.isLevelUnlocked(level)) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+
+        SnackBar(
+
+          content: Text(
+
+            'Complete earlier levels to unlock Level $level.',
+
+          ),
+
+        ),
+
+      );
+
+      return;
+
+    }
+
+    GameProgress.selectLevel(level);
+
+    Navigator.pushNamed(
+
+      context,
+
+      AppRoutes.crossword,
+
+      arguments: level,
+
+    ).then((_) {
+
+      if (mounted) {
+
+        setState(() {});
+
+      }
+
+    });
+
+  }
+
+  Future<void> _resetProgress() async {
+
+    await GameProgress.resetProgress();
+
+    if (!mounted) {
+
+      return;
+
+    }
+
+    setState(() {});
+
+    ScaffoldMessenger.of(context).showSnackBar(
+
+      const SnackBar(
+
+        content: Text('Level progress has been reset.'),
+
+      ),
+
+    );
+
+  }
+
+  @override
+
   Widget build(BuildContext context) {
+
+    if (_isLoading) {
+
+      return const Scaffold(
+
+        body: Center(
+
+          child: CircularProgressIndicator(),
+
+        ),
+
+      );
+
+    }
 
     return Scaffold(
 
@@ -16,129 +138,193 @@ class LevelsScreen extends StatelessWidget {
 
         title: const Text('Choose a Level'),
 
+        actions: [
+
+          IconButton(
+
+            tooltip: 'Reset progress',
+
+            onPressed: _resetProgress,
+
+            icon: const Icon(
+
+              Icons.restart_alt_rounded,
+
+            ),
+
+          ),
+
+        ],
+
       ),
 
-      body: GridView.builder(
+      body: LayoutBuilder(
 
-        padding: const EdgeInsets.all(20),
+        builder: (context, constraints) {
 
-        itemCount: 12,
+          int columnCount = 3;
 
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          if (constraints.maxWidth < 600) {
 
-          crossAxisCount: 3,
+            columnCount = 2;
 
-          mainAxisSpacing: 14,
+          }
 
-          crossAxisSpacing: 14,
+          if (constraints.maxWidth < 380) {
 
-        ),
+            columnCount = 1;
 
-        itemBuilder: (context, index) {
+          }
 
-          final int level = index + 1;
+          return GridView.builder(
 
-          final bool unlocked = level <= 4;
+            padding: const EdgeInsets.all(20),
 
-          return InkWell(
+            itemCount: GameProgress.totalLevels,
 
-            borderRadius: BorderRadius.circular(16),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
 
-            onTap: unlocked
+              crossAxisCount: columnCount,
 
-                ? () {
+              mainAxisSpacing: 14,
 
-                    Navigator.pushNamed(
+              crossAxisSpacing: 14,
 
-                      context,
+              childAspectRatio: 1,
 
-                      AppRoutes.crossword,
+            ),
 
-                      arguments: level,
+            itemBuilder: (context, index) {
 
-                    );
+              final int level = index + 1;
 
-                  }
+              final bool unlocked =
 
-                : () {
+                  GameProgress.isLevelUnlocked(level);
 
-                    ScaffoldMessenger.of(context).showSnackBar(
+              final bool selected =
 
-                      SnackBar(
+                  GameProgress.currentLevel == level;
 
-                        content: Text(
+              return InkWell(
 
-                          'Complete earlier levels to unlock Level $level.',
+                borderRadius: BorderRadius.circular(18),
 
-                        ),
+                onTap: () => _openLevel(context, level),
 
-                      ),
+                child: Card(
 
-                    );
+                  elevation: selected ? 6 : 2,
 
-                  },
+                  shape: RoundedRectangleBorder(
 
-            child: Card(
+                    borderRadius: BorderRadius.circular(18),
 
-              child: Column(
+                    side: BorderSide(
 
-                mainAxisAlignment: MainAxisAlignment.center,
+                      width: selected ? 3 : 1,
 
-                children: [
-
-                  Icon(
-
-                    unlocked
-
-                        ? Icons.lock_open_rounded
-
-                        : Icons.lock_rounded,
-
-                    color: unlocked
-
-                        ? const Color(0xFF078930)
-
-                        : Colors.grey,
-
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  Text(
-
-                    '$level',
-
-                    style: const TextStyle(
-
-                      fontSize: 26,
-
-                      fontWeight: FontWeight.bold,
-
-                    ),
-
-                  ),
-
-                  Text(
-
-                    unlocked ? 'Open' : 'Locked',
-
-                    style: TextStyle(
-
-                      color: unlocked
+                      color: selected
 
                           ? const Color(0xFF078930)
 
-                          : Colors.grey,
+                          : Colors.grey.shade300,
 
                     ),
 
                   ),
 
-                ],
+                  child: Padding(
 
-              ),
+                    padding: const EdgeInsets.all(12),
 
-            ),
+                    child: Column(
+
+                      mainAxisAlignment:
+
+                          MainAxisAlignment.center,
+
+                      children: [
+
+                        Icon(
+
+                          unlocked
+
+                              ? Icons.lock_open_rounded
+
+                              : Icons.lock_rounded,
+
+                          size: 34,
+
+                          color: unlocked
+
+                              ? const Color(0xFF078930)
+
+                              : Colors.grey,
+
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        Text(
+
+                          'Level $level',
+
+                          style: Theme.of(context)
+
+                              .textTheme
+
+                              .titleMedium
+
+                              ?.copyWith(
+
+                                fontWeight:
+
+                                    FontWeight.bold,
+
+                              ),
+
+                          textAlign: TextAlign.center,
+
+                        ),
+
+                        const SizedBox(height: 6),
+
+                        Text(
+
+                          unlocked
+
+                              ? 'Ready to play'
+
+                              : 'Locked',
+
+                          style: TextStyle(
+
+                            color: unlocked
+
+                                ? const Color(0xFF078930)
+
+                                : Colors.grey,
+
+                            fontWeight: FontWeight.w600,
+
+                          ),
+
+                          textAlign: TextAlign.center,
+
+                        ),
+
+                      ],
+
+                    ),
+
+                  ),
+
+                ),
+
+              );
+
+            },
 
           );
 

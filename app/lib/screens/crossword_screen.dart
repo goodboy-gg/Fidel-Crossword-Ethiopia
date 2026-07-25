@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../app/app_routes.dart';
+
+import '../game_progress.dart';
+
 class CrosswordScreen extends StatefulWidget {
 
   const CrosswordScreen({super.key});
@@ -12,61 +16,13 @@ class CrosswordScreen extends StatefulWidget {
 
 class _CrosswordScreenState extends State<CrosswordScreen> {
 
-  // The # symbol represents a blocked crossword square.
+  int _level = 1;
 
-  final List<String> _answers = <String>[
+  bool _levelLoaded = false;
 
-    'ሀ', 'ሁ', '#', 'ለ', 'ሉ',
+  late _PuzzleData _puzzle;
 
-    'ሂ', 'ሃ', '#', 'ሊ', 'ላ',
-
-    '#', '#', '#', '#', '#',
-
-    'መ', 'ሙ', '#', 'ሰ', 'ሱ',
-
-    'ሚ', 'ማ', '#', 'ሲ', 'ሳ',
-
-  ];
-
-  final List<String> _playerAnswers =
-
-      List<String>.filled(25, '');
-
-  final List<String> _fidelKeyboard = <String>[
-
-    'ሀ',
-
-    'ሁ',
-
-    'ሂ',
-
-    'ሃ',
-
-    'ለ',
-
-    'ሉ',
-
-    'ሊ',
-
-    'ላ',
-
-    'መ',
-
-    'ሙ',
-
-    'ሚ',
-
-    'ማ',
-
-    'ሰ',
-
-    'ሱ',
-
-    'ሲ',
-
-    'ሳ',
-
-  ];
+  late List<String> _playerAnswers;
 
   int? _selectedIndex;
 
@@ -76,9 +32,435 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
   bool _puzzleCompleted = false;
 
+  static const List<_PuzzleData> _puzzles = <_PuzzleData>[
+
+    _PuzzleData(
+
+      title: 'Level 1 — ሀ Family',
+
+      subtitle: 'Learn the seven forms of ሀ.',
+
+      instruction: 'Complete the ሀ family from ሀ to ሆ.',
+
+      answers: <String>[
+
+        'ሀ', 'ሁ', 'ሂ', '#', '#',
+
+        '#', '#', 'ሃ', '#', '#',
+
+        '#', '#', 'ሄ', 'ህ', 'ሆ',
+
+        '#', '#', '#', '#', '#',
+
+        '#', '#', '#', '#', '#',
+
+      ],
+
+      keyboard: <String>[
+
+        'ሀ', 'ሁ', 'ሂ', 'ሃ', 'ሄ', 'ህ', 'ሆ', 'ለ', 'ሉ', 'ሊ',
+
+      ],
+
+    ),
+
+    _PuzzleData(
+
+      title: 'Level 2 — ለ Family',
+
+      subtitle: 'Learn the seven forms of ለ.',
+
+      instruction: 'Complete the ለ family from ለ to ሎ.',
+
+      answers: <String>[
+
+        'ለ', 'ሉ', 'ሊ', '#', '#',
+
+        '#', '#', 'ላ', '#', '#',
+
+        '#', '#', 'ሌ', 'ል', 'ሎ',
+
+        '#', '#', '#', '#', '#',
+
+        '#', '#', '#', '#', '#',
+
+      ],
+
+      keyboard: <String>[
+
+        'ለ', 'ሉ', 'ሊ', 'ላ', 'ሌ', 'ል', 'ሎ', 'ሀ', 'ሁ', 'ሂ',
+
+      ],
+
+    ),
+
+    _PuzzleData(
+
+      title: 'Level 3 — ሐ Family',
+
+      subtitle: 'Learn the seven forms of ሐ.',
+
+      instruction: 'Complete the ሐ family from ሐ to ሖ.',
+
+      answers: <String>[
+
+        'ሐ', 'ሑ', 'ሒ', '#', '#',
+
+        '#', '#', 'ሓ', '#', '#',
+
+        '#', '#', 'ሔ', 'ሕ', 'ሖ',
+
+        '#', '#', '#', '#', '#',
+
+        '#', '#', '#', '#', '#',
+
+      ],
+
+      keyboard: <String>[
+
+        'ሐ', 'ሑ', 'ሒ', 'ሓ', 'ሔ', 'ሕ', 'ሖ', 'ለ', 'ሉ', 'ሊ',
+
+      ],
+
+    ),
+
+    _PuzzleData(
+
+      title: 'Level 4 — መ Family',
+
+      subtitle: 'Learn the seven forms of መ.',
+
+      instruction: 'Complete the መ family from መ to ሞ.',
+
+      answers: <String>[
+
+        'መ', 'ሙ', 'ሚ', '#', '#',
+
+        '#', '#', 'ማ', '#', '#',
+
+        '#', '#', 'ሜ', 'ም', 'ሞ',
+
+        '#', '#', '#', '#', '#',
+
+        '#', '#', '#', '#', '#',
+
+      ],
+
+      keyboard: <String>[
+
+        'መ', 'ሙ', 'ሚ', 'ማ', 'ሜ', 'ም', 'ሞ', 'ሐ', 'ሑ', 'ሒ',
+
+      ],
+
+    ),
+
+    _PuzzleData(
+
+      title: 'Level 5 — ሠ Family',
+
+      subtitle: 'Learn the seven forms of ሠ.',
+
+      instruction: 'Complete the ሠ family from ሠ to ሦ.',
+
+      answers: <String>[
+
+        'ሠ', 'ሡ', 'ሢ', '#', '#',
+
+        '#', '#', 'ሣ', '#', '#',
+
+        '#', '#', 'ሤ', 'ሥ', 'ሦ',
+
+        '#', '#', '#', '#', '#',
+
+        '#', '#', '#', '#', '#',
+
+      ],
+
+      keyboard: <String>[
+
+        'ሠ', 'ሡ', 'ሢ', 'ሣ', 'ሤ', 'ሥ', 'ሦ', 'መ', 'ሙ', 'ሚ',
+
+      ],
+
+    ),
+
+    _PuzzleData(
+
+      title: 'Level 6 — ረ Family',
+
+      subtitle: 'Learn the seven forms of ረ.',
+
+      instruction: 'Complete the ረ family from ረ to ሮ.',
+
+      answers: <String>[
+
+        'ረ', 'ሩ', 'ሪ', '#', '#',
+
+        '#', '#', 'ራ', '#', '#',
+
+        '#', '#', 'ሬ', 'ር', 'ሮ',
+
+        '#', '#', '#', '#', '#',
+
+        '#', '#', '#', '#', '#',
+
+      ],
+
+      keyboard: <String>[
+
+        'ረ', 'ሩ', 'ሪ', 'ራ', 'ሬ', 'ር', 'ሮ', 'ሠ', 'ሡ', 'ሢ',
+
+      ],
+
+    ),
+
+    _PuzzleData(
+
+      title: 'Level 7 — ሰ Family',
+
+      subtitle: 'Learn the seven forms of ሰ.',
+
+      instruction: 'Complete the ሰ family from ሰ to ሶ.',
+
+      answers: <String>[
+
+        'ሰ', 'ሱ', 'ሲ', '#', '#',
+
+        '#', '#', 'ሳ', '#', '#',
+
+        '#', '#', 'ሴ', 'ስ', 'ሶ',
+
+        '#', '#', '#', '#', '#',
+
+        '#', '#', '#', '#', '#',
+
+      ],
+
+      keyboard: <String>[
+
+        'ሰ', 'ሱ', 'ሲ', 'ሳ', 'ሴ', 'ስ', 'ሶ', 'ረ', 'ሩ', 'ሪ',
+
+      ],
+
+    ),
+
+    _PuzzleData(
+
+      title: 'Level 8 — ሸ Family',
+
+      subtitle: 'Learn the seven forms of ሸ.',
+
+      instruction: 'Complete the ሸ family from ሸ to ሾ.',
+
+      answers: <String>[
+
+        'ሸ', 'ሹ', 'ሺ', '#', '#',
+
+        '#', '#', 'ሻ', '#', '#',
+
+        '#', '#', 'ሼ', 'ሽ', 'ሾ',
+
+        '#', '#', '#', '#', '#',
+
+        '#', '#', '#', '#', '#',
+
+      ],
+
+      keyboard: <String>[
+
+        'ሸ', 'ሹ', 'ሺ', 'ሻ', 'ሼ', 'ሽ', 'ሾ', 'ሰ', 'ሱ', 'ሲ',
+
+      ],
+
+    ),
+
+    _PuzzleData(
+
+      title: 'Level 9 — ቀ Family',
+
+      subtitle: 'Learn the seven forms of ቀ.',
+
+      instruction: 'Complete the ቀ family from ቀ to ቆ.',
+
+      answers: <String>[
+
+        'ቀ', 'ቁ', 'ቂ', '#', '#',
+
+        '#', '#', 'ቃ', '#', '#',
+
+        '#', '#', 'ቄ', 'ቅ', 'ቆ',
+
+        '#', '#', '#', '#', '#',
+
+        '#', '#', '#', '#', '#',
+
+      ],
+
+      keyboard: <String>[
+
+        'ቀ', 'ቁ', 'ቂ', 'ቃ', 'ቄ', 'ቅ', 'ቆ', 'ሸ', 'ሹ', 'ሺ',
+
+      ],
+
+    ),
+
+    _PuzzleData(
+
+      title: 'Level 10 — በ Family',
+
+      subtitle: 'Learn the seven forms of በ.',
+
+      instruction: 'Complete the በ family from በ to ቦ.',
+
+      answers: <String>[
+
+        'በ', 'ቡ', 'ቢ', '#', '#',
+
+        '#', '#', 'ባ', '#', '#',
+
+        '#', '#', 'ቤ', 'ብ', 'ቦ',
+
+        '#', '#', '#', '#', '#',
+
+        '#', '#', '#', '#', '#',
+
+      ],
+
+      keyboard: <String>[
+
+        'በ', 'ቡ', 'ቢ', 'ባ', 'ቤ', 'ብ', 'ቦ', 'ቀ', 'ቁ', 'ቂ',
+
+      ],
+
+    ),
+
+    _PuzzleData(
+
+      title: 'Level 11 — ተ Family',
+
+      subtitle: 'Learn the seven forms of ተ.',
+
+      instruction: 'Complete the ተ family from ተ to ቶ.',
+
+      answers: <String>[
+
+        'ተ', 'ቱ', 'ቲ', '#', '#',
+
+        '#', '#', 'ታ', '#', '#',
+
+        '#', '#', 'ቴ', 'ት', 'ቶ',
+
+        '#', '#', '#', '#', '#',
+
+        '#', '#', '#', '#', '#',
+
+      ],
+
+      keyboard: <String>[
+
+        'ተ', 'ቱ', 'ቲ', 'ታ', 'ቴ', 'ት', 'ቶ', 'በ', 'ቡ', 'ቢ',
+
+      ],
+
+    ),
+
+    _PuzzleData(
+
+      title: 'Level 12 — ቸ Family',
+
+      subtitle: 'Complete the final beginner family.',
+
+      instruction: 'Complete the ቸ family from ቸ to ቾ.',
+
+      answers: <String>[
+
+        'ቸ', 'ቹ', 'ቺ', '#', '#',
+
+        '#', '#', 'ቻ', '#', '#',
+
+        '#', '#', 'ቼ', 'ች', 'ቾ',
+
+        '#', '#', '#', '#', '#',
+
+        '#', '#', '#', '#', '#',
+
+      ],
+
+      keyboard: <String>[
+
+        'ቸ', 'ቹ', 'ቺ', 'ቻ', 'ቼ', 'ች', 'ቾ', 'ተ', 'ቱ', 'ቲ',
+
+      ],
+
+    ),
+
+  ];
+
+  @override
+
+  void didChangeDependencies() {
+
+    super.didChangeDependencies();
+
+    if (_levelLoaded) {
+
+      return;
+
+    }
+
+    final Object? arguments = ModalRoute.of(context)?.settings.arguments;
+
+    if (arguments is int &&
+
+        arguments >= 1 &&
+
+        arguments <= _puzzles.length) {
+
+      _level = arguments;
+
+    } else {
+
+      _level = GameProgress.currentLevel;
+
+      if (_level < 1 || _level > _puzzles.length) {
+
+        _level = 1;
+
+      }
+
+    }
+
+    _loadPuzzle();
+
+    _levelLoaded = true;
+
+  }
+
+  void _loadPuzzle() {
+
+    _puzzle = _puzzles[_level - 1];
+
+    _playerAnswers = List<String>.filled(
+
+      _puzzle.answers.length,
+
+      '',
+
+    );
+
+    _selectedIndex = null;
+
+    _score = 0;
+
+    _answersChecked = false;
+
+    _puzzleCompleted = false;
+
+  }
+
   int get _playableCellCount {
 
-    return _answers
+    return _puzzle.answers
 
         .where((String letter) => letter != '#')
 
@@ -90,9 +472,13 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
     int filledCells = 0;
 
-    for (int index = 0; index < _answers.length; index++) {
+    for (int index = 0;
 
-      if (_answers[index] != '#' &&
+        index < _puzzle.answers.length;
+
+        index++) {
+
+      if (_puzzle.answers[index] != '#' &&
 
           _playerAnswers[index].isNotEmpty) {
 
@@ -120,7 +506,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
   void _selectCell(int index) {
 
-    if (_answers[index] == '#') {
+    if (_puzzle.answers[index] == '#') {
 
       return;
 
@@ -186,15 +572,13 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
     }
 
-    // First, search forward for an empty playable cell.
-
     for (int index = currentIndex + 1;
 
-        index < _answers.length;
+        index < _puzzle.answers.length;
 
         index++) {
 
-      if (_answers[index] != '#' &&
+      if (_puzzle.answers[index] != '#' &&
 
           _playerAnswers[index].isEmpty) {
 
@@ -206,11 +590,9 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
     }
 
-    // If necessary, return to the beginning.
-
     for (int index = 0; index < currentIndex; index++) {
 
-      if (_answers[index] != '#' &&
+      if (_puzzle.answers[index] != '#' &&
 
           _playerAnswers[index].isEmpty) {
 
@@ -264,23 +646,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
     setState(() {
 
-      for (int index = 0;
-
-          index < _playerAnswers.length;
-
-          index++) {
-
-        _playerAnswers[index] = '';
-
-      }
-
-      _selectedIndex = null;
-
-      _score = 0;
-
-      _answersChecked = false;
-
-      _puzzleCompleted = false;
+      _loadPuzzle();
 
     });
 
@@ -292,9 +658,13 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
     bool everyCellIsFilled = true;
 
-    for (int index = 0; index < _answers.length; index++) {
+    for (int index = 0;
 
-      if (_answers[index] == '#') {
+        index < _puzzle.answers.length;
+
+        index++) {
+
+      if (_puzzle.answers[index] == '#') {
 
         continue;
 
@@ -306,7 +676,9 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
       }
 
-      if (_playerAnswers[index] == _answers[index]) {
+      if (_playerAnswers[index] ==
+
+          _puzzle.answers[index]) {
 
         correctAnswers++;
 
@@ -342,7 +714,9 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
           content: Text(
 
-            '$correctAnswers of $_playableCellCount letters are correct.',
+            '$correctAnswers of '
+
+            '$_playableCellCount letters are correct.',
 
           ),
 
@@ -355,6 +729,18 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
   }
 
   Future<void> _showCompletionDialog() async {
+
+    await GameProgress.unlockNextLevel(_level);
+
+    if (!mounted) {
+
+      return;
+
+    }
+
+    final bool hasNextLevel =
+
+        _level < GameProgress.totalLevels;
 
     await showDialog<void>(
 
@@ -388,14 +774,13 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
             'Excellent work!\n\n'
 
-            'You completed the first Fidel crossword.\n'
+            'You completed Level $_level.\n'
 
             'Your score is $_score points.',
 
             textAlign: TextAlign.center,
 
           ),
-
           actionsAlignment: MainAxisAlignment.center,
 
           actions: <Widget>[
@@ -416,19 +801,69 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
             ),
 
+            if (hasNextLevel)
+
+              FilledButton.icon(
+
+                onPressed: () async {
+
+                  final int nextLevel = _level + 1;
+
+                  await GameProgress.selectLevel(nextLevel);
+
+                  if (!mounted) {
+
+                    return;
+
+                  }
+
+                  Navigator.of(dialogContext).pop();
+
+                  Navigator.pushReplacementNamed(
+
+                    context,
+
+                    AppRoutes.crossword,
+
+                    arguments: nextLevel,
+
+                  );
+
+                },
+
+                icon: const Icon(
+
+                  Icons.arrow_forward_rounded,
+
+                ),
+
+                label: const Text('Next Level'),
+
+              ),
+
             OutlinedButton.icon(
 
               onPressed: () {
 
                 Navigator.of(dialogContext).pop();
 
-                Navigator.of(context).pop();
+                Navigator.pushReplacementNamed(
+
+                  context,
+
+                  AppRoutes.levels,
+
+                );
 
               },
 
-              icon: const Icon(Icons.home_rounded),
+              icon: const Icon(
 
-              label: const Text('Main Menu'),
+                Icons.grid_view_rounded,
+
+              ),
+
+              label: const Text('Levels'),
 
             ),
 
@@ -444,7 +879,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
   Color _cellBackgroundColor(int index) {
 
-    if (_answers[index] == '#') {
+    if (_puzzle.answers[index] == '#') {
 
       return const Color(0xFF172033);
 
@@ -460,7 +895,9 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
         _playerAnswers[index].isNotEmpty) {
 
-      if (_playerAnswers[index] == _answers[index]) {
+      if (_playerAnswers[index] ==
+
+          _puzzle.answers[index]) {
 
         return const Color(0xFFD8F3DC);
 
@@ -486,7 +923,9 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
         _playerAnswers[index].isNotEmpty) {
 
-      if (_playerAnswers[index] == _answers[index]) {
+      if (_playerAnswers[index] ==
+
+          _puzzle.answers[index]) {
 
         return const Color(0xFF078930);
 
@@ -504,6 +943,20 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
   Widget build(BuildContext context) {
 
+    if (!_levelLoaded) {
+
+      return const Scaffold(
+
+        body: Center(
+
+          child: CircularProgressIndicator(),
+
+        ),
+
+      );
+
+    }
+
     return Scaffold(
 
       backgroundColor: const Color(0xFFF7F8FA),
@@ -516,11 +969,11 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
         centerTitle: true,
 
-        title: const Text(
+        title: Text(
 
-          'Fidel Crossword',
+          'Fidel Crossword — Level $_level',
 
-          style: TextStyle(
+          style: const TextStyle(
 
             fontWeight: FontWeight.bold,
 
@@ -654,7 +1107,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
             children: <Widget>[
 
-              const Expanded(
+              Expanded(
 
                 child: Column(
 
@@ -666,9 +1119,9 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
                     Text(
 
-                      'Beginner Puzzle 1',
+                      _puzzle.title,
 
-                      style: TextStyle(
+                      style: const TextStyle(
 
                         color: Colors.white,
 
@@ -680,13 +1133,13 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
                     ),
 
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
 
                     Text(
 
-                      'Complete the Fidel families.',
+                      _puzzle.subtitle,
 
-                      style: TextStyle(
+                      style: const TextStyle(
 
                         color: Colors.white70,
 
@@ -848,13 +1301,13 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
       ),
 
-      child: const Row(
+      child: Row(
 
         crossAxisAlignment: CrossAxisAlignment.start,
 
         children: <Widget>[
 
-          Icon(
+          const Icon(
 
             Icons.lightbulb_rounded,
 
@@ -864,7 +1317,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
           ),
 
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
 
           Expanded(
 
@@ -876,7 +1329,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
               children: <Widget>[
 
-                Text(
+                const Text(
 
                   'Puzzle instructions',
 
@@ -892,17 +1345,17 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
                 ),
 
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
 
                 Text(
 
-                  'Tap a white square and choose the '
+                  '${_puzzle.instruction} '
 
-                  'correct Fidel letter below. Complete '
+                  'Tap a white square and choose '
 
-                  'the ሀ, ለ, መ and ሰ families.',
+                  'the correct Fidel letter below.',
 
-                  style: TextStyle(
+                  style: const TextStyle(
 
                     color: Color(0xFF594300),
 
@@ -926,11 +1379,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
   }
 
-  // BLOCK 1 ENDS HERE.
-
-  // PASTE BLOCK 2 DIRECTLY BELOW THIS LINE.
-
-Widget _buildCrosswordGrid() {
+  Widget _buildCrosswordGrid() {
 
     return Center(
 
@@ -948,9 +1397,11 @@ Widget _buildCrosswordGrid() {
 
           child: GridView.builder(
 
-            physics: const NeverScrollableScrollPhysics(),
+            physics:
 
-            itemCount: _answers.length,
+                const NeverScrollableScrollPhysics(),
+
+            itemCount: _puzzle.answers.length,
 
             gridDelegate:
 
@@ -974,7 +1425,7 @@ Widget _buildCrosswordGrid() {
 
               final bool isBlocked =
 
-                  _answers[index] == '#';
+                  _puzzle.answers[index] == '#';
 
               return InkWell(
 
@@ -996,15 +1447,19 @@ Widget _buildCrosswordGrid() {
 
                     color: _cellBackgroundColor(index),
 
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius:
+
+                        BorderRadius.circular(10),
 
                     border: Border.all(
 
                       color: _cellBorderColor(index),
 
-                      width:
+                      width: _selectedIndex == index
 
-                          _selectedIndex == index ? 3 : 1.5,
+                          ? 3
+
+                          : 1.5,
 
                     ),
 
@@ -1016,13 +1471,15 @@ Widget _buildCrosswordGrid() {
 
                             BoxShadow(
 
-                              color:
+                              color: Colors.black
 
-                                  Colors.black.withOpacity(0.08),
+                                  .withOpacity(0.08),
 
                               blurRadius: 5,
 
-                              offset: const Offset(0, 2),
+                              offset:
+
+                                  const Offset(0, 2),
 
                             ),
 
@@ -1050,11 +1507,15 @@ Widget _buildCrosswordGrid() {
 
                                 style: TextStyle(
 
-                                  color: Colors.grey.shade600,
+                                  color:
+
+                                      Colors.grey.shade600,
 
                                   fontSize: 10,
 
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight:
+
+                                      FontWeight.bold,
 
                                 ),
 
@@ -1070,11 +1531,15 @@ Widget _buildCrosswordGrid() {
 
                                 style: const TextStyle(
 
-                                  color: Color(0xFF172033),
+                                  color:
+
+                                      Color(0xFF172033),
 
                                   fontSize: 30,
 
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight:
+
+                                      FontWeight.bold,
 
                                 ),
 
@@ -1150,7 +1615,7 @@ Widget _buildCrosswordGrid() {
 
       alignment: WrapAlignment.center,
 
-      children: _fidelKeyboard.map((String letter) {
+      children: _puzzle.keyboard.map((String letter) {
 
         return SizedBox(
 
@@ -1166,7 +1631,9 @@ Widget _buildCrosswordGrid() {
 
               backgroundColor: Colors.white,
 
-              foregroundColor: const Color(0xFF075A32),
+              foregroundColor:
+
+                  const Color(0xFF075A32),
 
               elevation: 2,
 
@@ -1236,7 +1703,9 @@ Widget _buildCrosswordGrid() {
 
                 style: OutlinedButton.styleFrom(
 
-                  minimumSize: const Size.fromHeight(52),
+                  minimumSize:
+
+                      const Size.fromHeight(52),
 
                   foregroundColor:
 
@@ -1250,7 +1719,9 @@ Widget _buildCrosswordGrid() {
 
                   shape: RoundedRectangleBorder(
 
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius:
+
+                        BorderRadius.circular(14),
 
                   ),
 
@@ -1278,7 +1749,9 @@ Widget _buildCrosswordGrid() {
 
                 style: OutlinedButton.styleFrom(
 
-                  minimumSize: const Size.fromHeight(52),
+                  minimumSize:
+
+                      const Size.fromHeight(52),
 
                   foregroundColor:
 
@@ -1292,7 +1765,9 @@ Widget _buildCrosswordGrid() {
 
                   shape: RoundedRectangleBorder(
 
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius:
+
+                        BorderRadius.circular(14),
 
                   ),
 
@@ -1338,11 +1813,15 @@ Widget _buildCrosswordGrid() {
 
             style: FilledButton.styleFrom(
 
-              backgroundColor: const Color(0xFF078930),
+              backgroundColor:
+
+                  const Color(0xFF078930),
 
               foregroundColor: Colors.white,
 
-              minimumSize: const Size.fromHeight(58),
+              minimumSize:
+
+                  const Size.fromHeight(58),
 
               shape: RoundedRectangleBorder(
 
@@ -1387,5 +1866,33 @@ Widget _buildCrosswordGrid() {
     );
 
   }
+
+}
+
+class _PuzzleData {
+
+  const _PuzzleData({
+
+    required this.title,
+
+    required this.subtitle,
+
+    required this.instruction,
+
+    required this.answers,
+
+    required this.keyboard,
+
+  });
+
+  final String title;
+
+  final String subtitle;
+
+  final String instruction;
+
+  final List<String> answers;
+
+  final List<String> keyboard;
 
 }

@@ -16,7 +16,7 @@ class GameProgress {
 
   static int currentLevel = 1;
 
-  static int highestUnlockedLevel = 12;
+  static int highestUnlockedLevel = 1;
 
   static bool _hasLoaded = false;
 
@@ -34,7 +34,7 @@ class GameProgress {
 
     highestUnlockedLevel =
 
-        preferences.getInt(_highestUnlockedKey) ?? 12;
+        preferences.getInt(_highestUnlockedKey) ?? 1;
 
     if (currentLevel < 1 ||
 
@@ -63,6 +63,8 @@ class GameProgress {
     }
 
     _hasLoaded = true;
+
+
 
   }
 
@@ -108,29 +110,11 @@ class GameProgress {
 
     if (nextLevel > highestUnlockedLevel &&
 
-        nextLevel <= totalLevels;
+        nextLevel <= totalLevels) {
 
-     Future<void> unlockAllLevels() async {
+      highestUnlockedLevel = nextLevel;
 
-
-  highestUnlockedLevel = totalLevels;
-
-  final SharedPreferences preferences =
-
-      await SharedPreferences.getInstance();
-
-  await preferences.setInt(
-
-    _highestUnlockedKey,
-
-    highestUnlockedLevel,
-
-  );
-
-}
-
-
-    
+      final SharedPreferences preferences =
 
           await SharedPreferences.getInstance();
 
@@ -143,6 +127,22 @@ class GameProgress {
       );
 
     }
+  }
+  static Future<void> unlockAllLevels() async {
+
+    highestUnlockedLevel = totalLevels;
+
+    final SharedPreferences preferences =
+
+        await SharedPreferences.getInstance();
+
+    await preferences.setInt(
+
+      _highestUnlockedKey,
+
+      highestUnlockedLevel,
+
+    );
 
   }
 
@@ -173,91 +173,5 @@ class GameProgress {
     );
 
   }
-static Future<void> unlockAllLevels() async {
-
-  highestUnlockedLevel = totalLevels;
-
-  final SharedPreferences preferences =
-
-      await SharedPreferences.getInstance();
-
-  await preferences.setInt(
-
-    _highestUnlockedKey,
-
-    highestUnlockedLevel,
-
-  );
-static Future<void> unlockAllLevels() async {
-
-  highestUnlockedLevel = totalLevels;
-
-  final SharedPreferences preferences =
-
-      await SharedPreferences.getInstance();
-
-  await preferences.setInt(
-
-    _highestUnlockedKey,
-
-    highestUnlockedLevel,
-
-  );
 
 }
-}
-static Future<void> resetProgress() async {
-
-
-
-  currentLevel = 1;
-
-
-
-  highestUnlockedLevel = 1;
-
-
-
-  final SharedPreferences preferences =
-
-
-
-      await SharedPreferences.getInstance();
-
-
-
-  await preferences.setInt(
-
-
-
-    _currentLevelKey,
-
-
-
-    currentLevel,
-
-
-
-  );
-
-
-
-  await preferences.setInt(
-
-
-
-    _highestUnlockedKey,
-
-
-
-    highestUnlockedLevel,
-
-
-
-  );
-
-
-
-}
-}
-
