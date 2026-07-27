@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../app/app_routes.dart';
 
 import '../game_progress.dart';
+import '../fidel_families.dart';
 
 class LevelsScreen extends StatefulWidget {
 
@@ -268,7 +269,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
 
                         Text(
 
-                          'Level $level',
+                          'Level $level — ${fidelFamilyName(level)}',
 
                           style: Theme.of(context)
 
@@ -294,7 +295,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
 
                           unlocked
 
-                              ? 'Ready to play'
+                              ? '${fidelFamilies[level - 1].first} to ${fidelFamilies[level - 1].last}'
 
                               : 'Locked',
 

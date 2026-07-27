@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 import '../app/app_routes.dart';
 
 import '../game_progress.dart';
+import '../fidel_families.dart';
 
 class CrosswordScreen extends StatefulWidget {
 
@@ -32,369 +34,32 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
   bool _puzzleCompleted = false;
 
-  static const List<_PuzzleData> _puzzles = <_PuzzleData>[
+  static final List<_PuzzleData> _puzzles =
+      List<_PuzzleData>.generate(fidelFamilies.length, (int index) {
+    final List<String> family = fidelFamilies[index];
+    final List<String> previousFamily =
+        fidelFamilies[(index - 1 + fidelFamilies.length) % fidelFamilies.length];
 
-    _PuzzleData(
-
-      title: 'Level 1 — ሀ Family',
-
-      subtitle: 'Learn the seven forms of ሀ.',
-
-      instruction: 'Complete the ሀ family from ሀ to ሆ.',
-
+    return _PuzzleData(
+      title: 'Level ${index + 1} — ${family.first} Family',
+      subtitle: 'Learn the seven forms of ${family.first}.',
+      instruction:
+          'Complete the ${family.first} family from ${family.first} to ${family.last}.',
       answers: <String>[
-
-        'ሀ', 'ሁ', 'ሂ', '#', '#',
-
-        '#', '#', 'ሃ', '#', '#',
-
-        '#', '#', 'ሄ', 'ህ', 'ሆ',
-
+        family[0], family[1], family[2], '#', '#',
+        '#', '#', family[3], '#', '#',
+        '#', '#', family[4], family[5], family[6],
         '#', '#', '#', '#', '#',
-
         '#', '#', '#', '#', '#',
-
       ],
-
       keyboard: <String>[
-
-        'ሀ', 'ሁ', 'ሂ', 'ሃ', 'ሄ', 'ህ', 'ሆ', 'ለ', 'ሉ', 'ሊ',
-
+        ...family,
+        previousFamily[0],
+        previousFamily[1],
+        previousFamily[2],
       ],
-
-    ),
-
-    _PuzzleData(
-
-      title: 'Level 2 — ለ Family',
-
-      subtitle: 'Learn the seven forms of ለ.',
-
-      instruction: 'Complete the ለ family from ለ to ሎ.',
-
-      answers: <String>[
-
-        'ለ', 'ሉ', 'ሊ', '#', '#',
-
-        '#', '#', 'ላ', '#', '#',
-
-        '#', '#', 'ሌ', 'ል', 'ሎ',
-
-        '#', '#', '#', '#', '#',
-
-        '#', '#', '#', '#', '#',
-
-      ],
-
-      keyboard: <String>[
-
-        'ለ', 'ሉ', 'ሊ', 'ላ', 'ሌ', 'ል', 'ሎ', 'ሀ', 'ሁ', 'ሂ',
-
-      ],
-
-    ),
-
-    _PuzzleData(
-
-      title: 'Level 3 — ሐ Family',
-
-      subtitle: 'Learn the seven forms of ሐ.',
-
-      instruction: 'Complete the ሐ family from ሐ to ሖ.',
-
-      answers: <String>[
-
-        'ሐ', 'ሑ', 'ሒ', '#', '#',
-
-        '#', '#', 'ሓ', '#', '#',
-
-        '#', '#', 'ሔ', 'ሕ', 'ሖ',
-
-        '#', '#', '#', '#', '#',
-
-        '#', '#', '#', '#', '#',
-
-      ],
-
-      keyboard: <String>[
-
-        'ሐ', 'ሑ', 'ሒ', 'ሓ', 'ሔ', 'ሕ', 'ሖ', 'ለ', 'ሉ', 'ሊ',
-
-      ],
-
-    ),
-
-    _PuzzleData(
-
-      title: 'Level 4 — መ Family',
-
-      subtitle: 'Learn the seven forms of መ.',
-
-      instruction: 'Complete the መ family from መ to ሞ.',
-
-      answers: <String>[
-
-        'መ', 'ሙ', 'ሚ', '#', '#',
-
-        '#', '#', 'ማ', '#', '#',
-
-        '#', '#', 'ሜ', 'ም', 'ሞ',
-
-        '#', '#', '#', '#', '#',
-
-        '#', '#', '#', '#', '#',
-
-      ],
-
-      keyboard: <String>[
-
-        'መ', 'ሙ', 'ሚ', 'ማ', 'ሜ', 'ም', 'ሞ', 'ሐ', 'ሑ', 'ሒ',
-
-      ],
-
-    ),
-
-    _PuzzleData(
-
-      title: 'Level 5 — ሠ Family',
-
-      subtitle: 'Learn the seven forms of ሠ.',
-
-      instruction: 'Complete the ሠ family from ሠ to ሦ.',
-
-      answers: <String>[
-
-        'ሠ', 'ሡ', 'ሢ', '#', '#',
-
-        '#', '#', 'ሣ', '#', '#',
-
-        '#', '#', 'ሤ', 'ሥ', 'ሦ',
-
-        '#', '#', '#', '#', '#',
-
-        '#', '#', '#', '#', '#',
-
-      ],
-
-      keyboard: <String>[
-
-        'ሠ', 'ሡ', 'ሢ', 'ሣ', 'ሤ', 'ሥ', 'ሦ', 'መ', 'ሙ', 'ሚ',
-
-      ],
-
-    ),
-
-    _PuzzleData(
-
-      title: 'Level 6 — ረ Family',
-
-      subtitle: 'Learn the seven forms of ረ.',
-
-      instruction: 'Complete the ረ family from ረ to ሮ.',
-
-      answers: <String>[
-
-        'ረ', 'ሩ', 'ሪ', '#', '#',
-
-        '#', '#', 'ራ', '#', '#',
-
-        '#', '#', 'ሬ', 'ር', 'ሮ',
-
-        '#', '#', '#', '#', '#',
-
-        '#', '#', '#', '#', '#',
-
-      ],
-
-      keyboard: <String>[
-
-        'ረ', 'ሩ', 'ሪ', 'ራ', 'ሬ', 'ር', 'ሮ', 'ሠ', 'ሡ', 'ሢ',
-
-      ],
-
-    ),
-
-    _PuzzleData(
-
-      title: 'Level 7 — ሰ Family',
-
-      subtitle: 'Learn the seven forms of ሰ.',
-
-      instruction: 'Complete the ሰ family from ሰ to ሶ.',
-
-      answers: <String>[
-
-        'ሰ', 'ሱ', 'ሲ', '#', '#',
-
-        '#', '#', 'ሳ', '#', '#',
-
-        '#', '#', 'ሴ', 'ስ', 'ሶ',
-
-        '#', '#', '#', '#', '#',
-
-        '#', '#', '#', '#', '#',
-
-      ],
-
-      keyboard: <String>[
-
-        'ሰ', 'ሱ', 'ሲ', 'ሳ', 'ሴ', 'ስ', 'ሶ', 'ረ', 'ሩ', 'ሪ',
-
-      ],
-
-    ),
-
-    _PuzzleData(
-
-      title: 'Level 8 — ሸ Family',
-
-      subtitle: 'Learn the seven forms of ሸ.',
-
-      instruction: 'Complete the ሸ family from ሸ to ሾ.',
-
-      answers: <String>[
-
-        'ሸ', 'ሹ', 'ሺ', '#', '#',
-
-        '#', '#', 'ሻ', '#', '#',
-
-        '#', '#', 'ሼ', 'ሽ', 'ሾ',
-
-        '#', '#', '#', '#', '#',
-
-        '#', '#', '#', '#', '#',
-
-      ],
-
-      keyboard: <String>[
-
-        'ሸ', 'ሹ', 'ሺ', 'ሻ', 'ሼ', 'ሽ', 'ሾ', 'ሰ', 'ሱ', 'ሲ',
-
-      ],
-
-    ),
-
-    _PuzzleData(
-
-      title: 'Level 9 — ቀ Family',
-
-      subtitle: 'Learn the seven forms of ቀ.',
-
-      instruction: 'Complete the ቀ family from ቀ to ቆ.',
-
-      answers: <String>[
-
-        'ቀ', 'ቁ', 'ቂ', '#', '#',
-
-        '#', '#', 'ቃ', '#', '#',
-
-        '#', '#', 'ቄ', 'ቅ', 'ቆ',
-
-        '#', '#', '#', '#', '#',
-
-        '#', '#', '#', '#', '#',
-
-      ],
-
-      keyboard: <String>[
-
-        'ቀ', 'ቁ', 'ቂ', 'ቃ', 'ቄ', 'ቅ', 'ቆ', 'ሸ', 'ሹ', 'ሺ',
-
-      ],
-
-    ),
-
-    _PuzzleData(
-
-      title: 'Level 10 — በ Family',
-
-      subtitle: 'Learn the seven forms of በ.',
-
-      instruction: 'Complete the በ family from በ to ቦ.',
-
-      answers: <String>[
-
-        'በ', 'ቡ', 'ቢ', '#', '#',
-
-        '#', '#', 'ባ', '#', '#',
-
-        '#', '#', 'ቤ', 'ብ', 'ቦ',
-
-        '#', '#', '#', '#', '#',
-
-        '#', '#', '#', '#', '#',
-
-      ],
-
-      keyboard: <String>[
-
-        'በ', 'ቡ', 'ቢ', 'ባ', 'ቤ', 'ብ', 'ቦ', 'ቀ', 'ቁ', 'ቂ',
-
-      ],
-
-    ),
-
-    _PuzzleData(
-
-      title: 'Level 11 — ተ Family',
-
-      subtitle: 'Learn the seven forms of ተ.',
-
-      instruction: 'Complete the ተ family from ተ to ቶ.',
-
-      answers: <String>[
-
-        'ተ', 'ቱ', 'ቲ', '#', '#',
-
-        '#', '#', 'ታ', '#', '#',
-
-        '#', '#', 'ቴ', 'ት', 'ቶ',
-
-        '#', '#', '#', '#', '#',
-
-        '#', '#', '#', '#', '#',
-
-      ],
-
-      keyboard: <String>[
-
-        'ተ', 'ቱ', 'ቲ', 'ታ', 'ቴ', 'ት', 'ቶ', 'በ', 'ቡ', 'ቢ',
-
-      ],
-
-    ),
-
-    _PuzzleData(
-
-      title: 'Level 12 — ቸ Family',
-
-      subtitle: 'Complete the final beginner family.',
-
-      instruction: 'Complete the ቸ family from ቸ to ቾ.',
-
-      answers: <String>[
-
-        'ቸ', 'ቹ', 'ቺ', '#', '#',
-
-        '#', '#', 'ቻ', '#', '#',
-
-        '#', '#', 'ቼ', 'ች', 'ቾ',
-
-        '#', '#', '#', '#', '#',
-
-        '#', '#', '#', '#', '#',
-
-      ],
-
-      keyboard: <String>[
-
-        'ቸ', 'ቹ', 'ቺ', 'ቻ', 'ቼ', 'ች', 'ቾ', 'ተ', 'ቱ', 'ቲ',
-
-      ],
-
-    ),
-
-  ];
+    );
+  });
 
   @override
 
@@ -742,6 +407,15 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
         _level < GameProgress.totalLevels;
 
+    final AudioPlayer celebrationPlayer = AudioPlayer();
+    await celebrationPlayer.play(
+      AssetSource('sounds/level_complete.wav'),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
     await showDialog<void>(
 
       context: context,
@@ -771,16 +445,10 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
           ),
 
           content: Text(
-
-            'Excellent work!\n\n'
-
-            'You completed Level $_level.\n'
-
-            'Your score is $_score points.',
-
+            'Excellent! You completed Level $_level and scored $_score points.',
             textAlign: TextAlign.center,
-
           ),
+
           actionsAlignment: MainAxisAlignment.center,
 
           actions: <Widget>[
@@ -980,7 +648,16 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
           ),
 
         ),
-
+leading: IconButton(
+  tooltip: 'Back to levels',
+  icon: const Icon(Icons.arrow_back_rounded),
+  onPressed: () {
+    Navigator.pushReplacementNamed(
+      context,
+      AppRoutes.levels,
+    );
+  },
+),
         actions: <Widget>[
 
           IconButton(
