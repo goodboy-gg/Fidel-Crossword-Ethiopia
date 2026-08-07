@@ -11,14 +11,14 @@ class FamilyStarterChallengeScreen extends StatefulWidget {
 class _FamilyStarterChallengeScreenState
     extends State<FamilyStarterChallengeScreen> {
   static const List<String> _answers = <String>[
-    'ሀ', 'ለ', 'ሐ', 'መ', 'ሠ', 'ረ', 'ሰ', 'ሸ', 'ቀ', 'በ', 'ተ', 'ቸ',
+    'ሀ', 'ለ', 'ሐ', 'መ', 'ሠ', 'ረ', 'ሰ', 'ቀ', 'በ', 'ተ', 'ቸ',
     'ኀ', 'ነ', 'ኘ', 'አ', 'ከ', 'ኸ', 'ወ', 'ዐ', 'ዘ', 'ዠ', 'የ', 'ደ',
     'ጀ', 'ገ', 'ጠ', 'ጨ', 'ጰ', 'ጸ', 'ፀ', 'ፈ', 'ፐ', 'ቨ',
   ];
 
   static const List<String> _mixedLetters = <String>[
     'የ', 'ሠ', 'ቸ', 'ፐ', 'ነ', 'ሀ', 'ጨ', 'ዐ', 'ቀ', 'ፈ', 'ጀ', 'ረ',
-    'ኸ', 'ዠ', 'መ', 'ፀ', 'በ', 'ሸ', 'አ', 'ጰ', 'ሐ', 'ደ', 'ኘ', 'ቨ',
+    'ኸ', 'ዠ', 'መ', 'ፀ', 'በ', 'አ', 'ጰ', 'ሐ', 'ደ', 'ኘ', 'ቨ',
     'ሰ', 'ጠ', 'ለ', 'ጸ', 'ዘ', 'ኀ', 'ገ', 'ተ', 'ከ', 'ወ',
   ];
 
@@ -87,7 +87,7 @@ class _FamilyStarterChallengeScreenState
               size: 58, color: Color(0xFFF4C430)),
           title: const Text('Level 4 Complete!', textAlign: TextAlign.center),
           content: Text(
-            'Excellent! You placed all 34 Fidel families correctly and scored $_score points.',
+            'Excellent! You placed all 33 Fidel families correctly and scored $_score points.',
             textAlign: TextAlign.center,
           ),
           actionsAlignment: MainAxisAlignment.center,
@@ -105,7 +105,7 @@ class _FamilyStarterChallengeScreenState
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$correct of 34 letters are correct.')),
+        SnackBar(content: Text('$correct of 33 letters are correct.')),
       );
     }
   }
@@ -149,7 +149,7 @@ class _FamilyStarterChallengeScreenState
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: const Text(
-                      'Put the 34 mixed Fidel family letters back into their correct numbered order.',
+                      'Put the 33 mixed Fidel family letters back into their correct numbered order.',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
