@@ -102,7 +102,7 @@ class HomeScreen extends StatelessWidget {
 
                     title: 'Challenge Yourself',
 
-                    subtitle: 'Put all 34 Fidel families in order',
+                    subtitle: 'Put all 33 Fidel families in order',
 
                     backgroundColor: const Color(0xFF6A1B9A),
 
