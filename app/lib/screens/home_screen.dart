@@ -43,7 +43,11 @@ class HomeScreen extends StatelessWidget {
                     foregroundColor: Colors.white,
 
                     onPressed: () {
-                      Navigator.pushNamed(context, AppRoutes.crossword);
+                      Navigator.pushNamed(
+                        context,
+                        AppRoutes.crossword,
+                        arguments: 1,
+                      );
                     },
                   ),
 
