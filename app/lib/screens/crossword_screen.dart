@@ -40,28 +40,19 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
     final List<String> previousFamily =
         fidelFamilies[(index - 1 + fidelFamilies.length) % fidelFamilies.length];
 
-    if (index == 0) {
-      return const _PuzzleData(
-        title: 'Level 1 — Learn the 34 Fidel Families',
-        subtitle: 'Learn the first letter of every Fidel family in order.',
-        instruction:
-            'Follow the 34 numbered boxes from 1 to 34 and place each family starter in the correct family order.',
-        answers: _familyStartersInOrder,
-        keyboard: _familyStartersInOrder,
-      );
-    }
-
+    // Level 3 is the ONLY special 34-family challenge.
     if (index == 2) {
       return const _PuzzleData(
         title: 'Level 3 — 34 Family Mixed Challenge',
         subtitle: 'All 34 Fidel family starters are mixed for a harder challenge.',
         instruction:
-            'The 34 family starters below are mixed. Put every first letter back into the correct family order from box 1 to box 34.',
+            'The 34 family starters are mixed. Put every first letter back into the correct family order from box 1 to box 34.',
         answers: _familyStartersInOrder,
         keyboard: _familyStartersShuffled,
       );
     }
 
+    // Level 1 and every other normal level keep the original family puzzle.
     return _PuzzleData(
       title: 'Level ${index + 1} — ${family.first} Family',
       subtitle: 'Learn the seven forms of ${family.first}.',
@@ -127,7 +118,8 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
   double get _progress =>
       _playableCellCount == 0 ? 0 : _filledCellCount / _playableCellCount;
 
-  bool get _usesThirtyFourFamilyGrid => _level == 1 || _level == 3;
+  // Important: Level 1 no longer shares Level 3's special grid settings.
+  bool get _usesThirtyFourFamilyGrid => _level == 3;
 
   void _selectCell(int index) {
     if (_puzzle.answers[index] == '#') return;
