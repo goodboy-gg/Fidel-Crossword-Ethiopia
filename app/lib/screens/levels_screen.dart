@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../app/app_routes.dart';
 import '../game_progress.dart';
 import '../fidel_families.dart';
-import 'level3_family_challenge_screen.dart';
 
 class LevelsScreen extends StatefulWidget {
   const LevelsScreen({super.key});
@@ -46,20 +45,6 @@ class _LevelsScreenState extends State<LevelsScreen> {
     }
 
     GameProgress.selectLevel(level);
-
-    if (level == 3) {
-      Navigator.push(
-        context,
-        MaterialPageRoute<void>(
-          builder: (_) => const Level3FamilyChallengeScreen(),
-        ),
-      ).then((_) {
-        if (mounted) {
-          setState(() {});
-        }
-      });
-      return;
-    }
 
     Navigator.pushNamed(
       context,
@@ -167,9 +152,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          level == 3
-                              ? 'Level 3 — Mixed Families'
-                              : 'Level $level — ${fidelFamilyName(level)}',
+                          'Level $level — ${fidelFamilyName(level)}',
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -181,9 +164,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
                         const SizedBox(height: 6),
                         Text(
                           unlocked
-                              ? (level == 3
-                                  ? '34 family reorder challenge'
-                                  : '${fidelFamilies[level - 1].first} to ${fidelFamilies[level - 1].last}')
+                              ? '${fidelFamilies[level - 1].first} to ${fidelFamilies[level - 1].last}'
                               : 'Locked',
                           style: TextStyle(
                             color: unlocked
