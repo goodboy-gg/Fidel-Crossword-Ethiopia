@@ -22,21 +22,6 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
   bool _answersChecked = false;
   bool _puzzleCompleted = false;
 
-  static const List<List<int>> _levelLayouts = <List<int>>[
-    <int>[0, 1, 2, 7, 12, 13, 14],
-    <int>[2, 7, 10, 11, 12, 17, 22],
-    <int>[4, 9, 10, 11, 12, 13, 14],
-    <int>[0, 5, 10, 11, 12, 17, 22],
-    <int>[4, 9, 12, 13, 14, 17, 22],
-    <int>[0, 1, 6, 11, 12, 17, 18],
-    <int>[2, 3, 4, 9, 14, 19, 24],
-    <int>[0, 5, 6, 7, 12, 17, 22],
-    <int>[3, 8, 11, 12, 13, 18, 23],
-    <int>[1, 6, 10, 11, 12, 16, 21],
-    <int>[0, 5, 10, 15, 20, 21, 22],
-    <int>[2, 7, 12, 13, 14, 19, 24],
-  ];
-
   static final List<_PuzzleData> _puzzles =
       List<_PuzzleData>.generate(fidelFamilies.length, (int index) {
     final List<String> family = fidelFamilies[index];
@@ -44,29 +29,36 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
         fidelFamilies[(index - 1 + fidelFamilies.length) % fidelFamilies.length];
 
     if (index == 2) {
-      return _PuzzleData(
+      return const _PuzzleData(
         title: 'Level 3 — Mixed Family Challenge',
         subtitle: 'Review seven different Fidel families together.',
         instruction:
             'Place the seven family letters in the correct order: ሀ, ለ, ሐ, መ, ሠ, ረ, ሰ.',
-        answers: _answersForLayout(
-          _levelLayouts[2],
-          const <String>['ሀ', 'ለ', 'ሐ', 'መ', 'ሠ', 'ረ', 'ሰ'],
-        ),
-        keyboard: const <String>[
+        answers: <String>[
+          'ሀ', 'ለ', 'ሐ', '#', '#',
+          '#', '#', 'መ', '#', '#',
+          '#', '#', 'ሠ', 'ረ', 'ሰ',
+          '#', '#', '#', '#', '#',
+          '#', '#', '#', '#', '#',
+        ],
+        keyboard: <String>[
           'ረ', 'ሀ', 'ሠ', 'ሐ', 'ሰ', 'ለ', 'መ', 'ሑ', 'ሙ', 'ሱ',
         ],
       );
     }
-
-    final List<int> layout = _levelLayouts[index % _levelLayouts.length];
 
     return _PuzzleData(
       title: 'Level ${index + 1} — ${family.first} Family',
       subtitle: 'Learn the seven forms of ${family.first}.',
       instruction:
           'Complete the ${family.first} family from ${family.first} to ${family.last}.',
-      answers: _answersForLayout(layout, family),
+      answers: <String>[
+        family[0], family[1], family[2], '#', '#',
+        '#', '#', family[3], '#', '#',
+        '#', '#', family[4], family[5], family[6],
+        '#', '#', '#', '#', '#',
+        '#', '#', '#', '#', '#',
+      ],
       keyboard: <String>[
         ...family,
         previousFamily[0],
@@ -75,17 +67,6 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
       ],
     );
   });
-
-  static List<String> _answersForLayout(
-    List<int> positions,
-    List<String> letters,
-  ) {
-    final List<String> answers = List<String>.filled(25, '#');
-    for (int i = 0; i < 7; i++) {
-      answers[positions[i]] = letters[i];
-    }
-    return answers;
-  }
 
   @override
   void didChangeDependencies() {
