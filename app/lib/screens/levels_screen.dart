@@ -32,6 +32,12 @@ class _LevelsScreenState extends State<LevelsScreen> {
     });
   }
 
+  int _mixedFamilyIndex(int boxIndex) {
+    // A fixed 34-family permutation keeps the challenge mixed while making
+    // sure every Fidel family appears exactly once.
+    return (boxIndex * 7 + 3) % fidelFamilies.length;
+  }
+
   void _openLevel(BuildContext context, int level) {
     if (!GameProgress.isLevelUnlocked(level)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -119,12 +125,14 @@ class _LevelsScreenState extends State<LevelsScreen> {
             ),
             itemBuilder: (context, index) {
               final int level = index + 1;
-              final bool unlocked = GameProgress.isLevelUnlocked(level);
-              final bool selected = GameProgress.currentLevel == level;
+              final int familyIndex = _mixedFamilyIndex(index);
+              final int familyLevel = familyIndex + 1;
+              final bool unlocked = GameProgress.isLevelUnlocked(familyLevel);
+              final bool selected = GameProgress.currentLevel == familyLevel;
 
               return InkWell(
                 borderRadius: BorderRadius.circular(18),
-                onTap: () => _openLevel(context, level),
+                onTap: () => _openLevel(context, familyLevel),
                 child: Card(
                   elevation: selected ? 6 : 2,
                   shape: RoundedRectangleBorder(
@@ -152,7 +160,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'Level $level — ${fidelFamilyName(level)}',
+                          'Level $level — ${fidelFamilyName(familyLevel)}',
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -164,7 +172,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
                         const SizedBox(height: 6),
                         Text(
                           unlocked
-                              ? '${fidelFamilies[level - 1].first} to ${fidelFamilies[level - 1].last}'
+                              ? '${fidelFamilies[familyIndex].first} to ${fidelFamilies[familyIndex].last}'
                               : 'Locked',
                           style: TextStyle(
                             color: unlocked
