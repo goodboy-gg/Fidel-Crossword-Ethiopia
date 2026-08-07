@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app/app_routes.dart';
+import 'family_starter_challenge_screen.dart';
 import 'learn_fidel_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -91,6 +92,31 @@ class HomeScreen extends StatelessWidget {
 
                     onPressed: () {
                       Navigator.pushNamed(context, AppRoutes.levels);
+                    },
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  _MenuButton(
+                    icon: Icons.extension_rounded,
+
+                    title: 'Challenge Yourself',
+
+                    subtitle: 'Put all 34 Fidel families in order',
+
+                    backgroundColor: const Color(0xFF6A1B9A),
+
+                    foregroundColor: Colors.white,
+
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return const FamilyStarterChallengeScreen();
+                          },
+                        ),
+                      );
                     },
                   ),
 
