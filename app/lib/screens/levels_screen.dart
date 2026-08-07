@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../app/app_routes.dart';
 import '../game_progress.dart';
 import '../fidel_families.dart';
+import 'challenge_crossword_screen.dart';
 
 class LevelsScreen extends StatefulWidget {
   const LevelsScreen({super.key});
@@ -32,12 +32,6 @@ class _LevelsScreenState extends State<LevelsScreen> {
     });
   }
 
-  int _mixedFamilyIndex(int boxIndex) {
-    // A fixed 34-family permutation keeps the challenge mixed while making
-    // sure every Fidel family appears exactly once.
-    return (boxIndex * 7 + 3) % fidelFamilies.length;
-  }
-
   void _openLevel(BuildContext context, int level) {
     if (!GameProgress.isLevelUnlocked(level)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -52,10 +46,11 @@ class _LevelsScreenState extends State<LevelsScreen> {
 
     GameProgress.selectLevel(level);
 
-    Navigator.pushNamed(
+    Navigator.push(
       context,
-      AppRoutes.crossword,
-      arguments: level,
+      MaterialPageRoute<void>(
+        builder: (_) => ChallengeCrosswordScreen(level: level),
+      ),
     ).then((_) {
       if (mounted) {
         setState(() {});
@@ -125,14 +120,12 @@ class _LevelsScreenState extends State<LevelsScreen> {
             ),
             itemBuilder: (context, index) {
               final int level = index + 1;
-              final int familyIndex = _mixedFamilyIndex(index);
-              final int familyLevel = familyIndex + 1;
-              final bool unlocked = GameProgress.isLevelUnlocked(familyLevel);
-              final bool selected = GameProgress.currentLevel == familyLevel;
+              final bool unlocked = GameProgress.isLevelUnlocked(level);
+              final bool selected = GameProgress.currentLevel == level;
 
               return InkWell(
                 borderRadius: BorderRadius.circular(18),
-                onTap: () => _openLevel(context, familyLevel),
+                onTap: () => _openLevel(context, level),
                 child: Card(
                   elevation: selected ? 6 : 2,
                   shape: RoundedRectangleBorder(
@@ -160,7 +153,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'Level $level — ${fidelFamilyName(familyLevel)}',
+                          'Level $level — ${fidelFamilyName(level)}',
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -172,7 +165,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
                         const SizedBox(height: 6),
                         Text(
                           unlocked
-                              ? '${fidelFamilies[familyIndex].first} to ${fidelFamilies[familyIndex].last}'
+                              ? '${fidelFamilies[level - 1].first} to ${fidelFamilies[level - 1].last}'
                               : 'Locked',
                           style: TextStyle(
                             color: unlocked
