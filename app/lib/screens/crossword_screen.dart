@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+
 import '../app/app_routes.dart';
 import '../game_progress.dart';
 import '../fidel_families.dart';
+
 class CrosswordScreen extends StatefulWidget {
   const CrosswordScreen({super.key});
+
   @override
   State<CrosswordScreen> createState() => _CrosswordScreenState();
 }
+
 class _CrosswordScreenState extends State<CrosswordScreen> {
   int _level = 1;
   bool _levelLoaded = false;
@@ -17,41 +21,52 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
   int _score = 0;
   bool _answersChecked = false;
   bool _puzzleCompleted = false;
+
+  static const List<List<int>> _levelLayouts = <List<int>>[
+    <int>[0, 1, 2, 7, 12, 13, 14],
+    <int>[2, 7, 10, 11, 12, 15, 20],
+    <int>[0, 1, 2, 7, 12, 13, 14],
+    <int>[4, 9, 12, 13, 14, 17, 22],
+    <int>[0, 5, 10, 11, 12, 13, 14],
+    <int>[2, 6, 10, 12, 14, 18, 22],
+    <int>[2, 7, 10, 11, 12, 15, 20],
+    <int>[0, 1, 6, 11, 12, 17, 22],
+    <int>[3, 4, 8, 12, 13, 17, 22],
+    <int>[0, 5, 6, 7, 12, 17, 18],
+    <int>[2, 3, 4, 9, 14, 19, 24],
+    <int>[2, 7, 12, 17, 20, 21, 22],
+  ];
+
   static final List<_PuzzleData> _puzzles =
       List<_PuzzleData>.generate(fidelFamilies.length, (int index) {
     final List<String> family = fidelFamilies[index];
     final List<String> previousFamily =
         fidelFamilies[(index - 1 + fidelFamilies.length) % fidelFamilies.length];
+
     if (index == 2) {
-      return const _PuzzleData(
+      return _PuzzleData(
         title: 'Level 3 — Mixed Family Challenge',
         subtitle: 'Review seven different Fidel families together.',
         instruction:
             'Place the seven family letters in the correct order: ሀ, ለ, ሐ, መ, ሠ, ረ, ሰ.',
-        answers: <String>[
-          'ሀ', 'ለ', 'ሐ', '#', '#',
-          '#', '#', 'መ', '#', '#',
-          '#', '#', 'ሠ', 'ረ', 'ሰ',
-          '#', '#', '#', '#', '#',
-          '#', '#', '#', '#', '#',
-        ],
-        keyboard: <String>[
+        answers: _answersForLayout(
+          _levelLayouts[2],
+          const <String>['ሀ', 'ለ', 'ሐ', 'መ', 'ሠ', 'ረ', 'ሰ'],
+        ),
+        keyboard: const <String>[
           'ረ', 'ሀ', 'ሠ', 'ሐ', 'ሰ', 'ለ', 'መ', 'ሑ', 'ሙ', 'ሱ',
         ],
       );
     }
+
+    final List<int> layout = _levelLayouts[index % _levelLayouts.length];
+
     return _PuzzleData(
       title: 'Level ${index + 1} — ${family.first} Family',
       subtitle: 'Learn the seven forms of ${family.first}.',
       instruction:
           'Complete the ${family.first} family from ${family.first} to ${family.last}.',
-      answers: <String>[
-        family[0], family[1], family[2], '#', '#',
-        '#', '#', family[3], '#', '#',
-        '#', '#', family[4], family[5], family[6],
-        '#', '#', '#', '#', '#',
-        '#', '#', '#', '#', '#',
-      ],
+      answers: _answersForLayout(layout, family),
       keyboard: <String>[
         ...family,
         previousFamily[0],
@@ -60,16 +75,25 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
       ],
     );
   });
+
+  static List<String> _answersForLayout(
+    List<int> positions,
+    List<String> letters,
+  ) {
+    final List<String> answers = List<String>.filled(25, '#');
+    for (int i = 0; i < 7; i++) {
+      answers[positions[i]] = letters[i];
+    }
+    return answers;
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_levelLoaded) {
-      return;
-    }
+    if (_levelLoaded) return;
+
     final Object? arguments = ModalRoute.of(context)?.settings.arguments;
-    if (arguments is int &&
-        arguments >= 1 &&
-        arguments <= _puzzles.length) {
+    if (arguments is int && arguments >= 1 && arguments <= _puzzles.length) {
       _level = arguments;
     } else {
       _level = GameProgress.currentLevel;
@@ -77,65 +101,54 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
         _level = 1;
       }
     }
+
     _loadPuzzle();
     _levelLoaded = true;
   }
+
   void _loadPuzzle() {
     _puzzle = _puzzles[_level - 1];
-    _playerAnswers = List<String>.filled(
-      _puzzle.answers.length,
-      '',
-    );
+    _playerAnswers = List<String>.filled(_puzzle.answers.length, '');
     _selectedIndex = null;
     _score = 0;
     _answersChecked = false;
     _puzzleCompleted = false;
   }
-  int get _playableCellCount {
-    return _puzzle.answers
-        .where((String letter) => letter != '#')
-        .length;
-  }
+
+  int get _playableCellCount =>
+      _puzzle.answers.where((String letter) => letter != '#').length;
+
   int get _filledCellCount {
-    int filledCells = 0;
-    for (int index = 0;
-        index < _puzzle.answers.length;
-        index++) {
-      if (_puzzle.answers[index] != '#' &&
-          _playerAnswers[index].isNotEmpty) {
-        filledCells++;
+    int count = 0;
+    for (int i = 0; i < _puzzle.answers.length; i++) {
+      if (_puzzle.answers[i] != '#' && _playerAnswers[i].isNotEmpty) {
+        count++;
       }
     }
-    return filledCells;
+    return count;
   }
-  double get _progress {
-    if (_playableCellCount == 0) {
-      return 0;
-    }
-    return _filledCellCount / _playableCellCount;
-  }
+
+  double get _progress =>
+      _playableCellCount == 0 ? 0 : _filledCellCount / _playableCellCount;
+
   void _selectCell(int index) {
-    if (_puzzle.answers[index] == '#') {
-      return;
-    }
+    if (_puzzle.answers[index] == '#') return;
     setState(() {
       _selectedIndex = index;
       _answersChecked = false;
       _puzzleCompleted = false;
     });
   }
+
   void _enterLetter(String letter) {
     final int? selectedIndex = _selectedIndex;
     if (selectedIndex == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Select a white crossword square first.',
-          ),
-        ),
+        const SnackBar(content: Text('Select a white crossword square first.')),
       );
       return;
     }
+
     setState(() {
       _playerAnswers[selectedIndex] = letter;
       _answersChecked = false;
@@ -143,103 +156,82 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
       _moveToNextCell();
     });
   }
+
   void _moveToNextCell() {
     final int? currentIndex = _selectedIndex;
-    if (currentIndex == null) {
-      return;
-    }
-    for (int index = currentIndex + 1;
-        index < _puzzle.answers.length;
-        index++) {
-      if (_puzzle.answers[index] != '#' &&
-          _playerAnswers[index].isEmpty) {
-        _selectedIndex = index;
+    if (currentIndex == null) return;
+
+    for (int i = currentIndex + 1; i < _puzzle.answers.length; i++) {
+      if (_puzzle.answers[i] != '#' && _playerAnswers[i].isEmpty) {
+        _selectedIndex = i;
         return;
       }
     }
-    for (int index = 0; index < currentIndex; index++) {
-      if (_puzzle.answers[index] != '#' &&
-          _playerAnswers[index].isEmpty) {
-        _selectedIndex = index;
+    for (int i = 0; i < currentIndex; i++) {
+      if (_puzzle.answers[i] != '#' && _playerAnswers[i].isEmpty) {
+        _selectedIndex = i;
         return;
       }
     }
   }
+
   void _clearSelectedCell() {
     final int? selectedIndex = _selectedIndex;
     if (selectedIndex == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Select a square that you want to clear.',
-          ),
-        ),
+        const SnackBar(content: Text('Select a square that you want to clear.')),
       );
       return;
     }
+
     setState(() {
       _playerAnswers[selectedIndex] = '';
       _answersChecked = false;
       _puzzleCompleted = false;
     });
   }
-  void _resetPuzzle() {
-    setState(() {
-      _loadPuzzle();
-    });
-  }
+
+  void _resetPuzzle() => setState(_loadPuzzle);
+
   void _checkAnswers() {
     int correctAnswers = 0;
     bool everyCellIsFilled = true;
-    for (int index = 0;
-        index < _puzzle.answers.length;
-        index++) {
-      if (_puzzle.answers[index] == '#') {
-        continue;
-      }
-      if (_playerAnswers[index].isEmpty) {
-        everyCellIsFilled = false;
-      }
-      if (_playerAnswers[index] ==
-          _puzzle.answers[index]) {
-        correctAnswers++;
-      }
+
+    for (int i = 0; i < _puzzle.answers.length; i++) {
+      if (_puzzle.answers[i] == '#') continue;
+      if (_playerAnswers[i].isEmpty) everyCellIsFilled = false;
+      if (_playerAnswers[i] == _puzzle.answers[i]) correctAnswers++;
     }
+
     final bool completed =
-        everyCellIsFilled &&
-        correctAnswers == _playableCellCount;
+        everyCellIsFilled && correctAnswers == _playableCellCount;
+
     setState(() {
       _score = correctAnswers * 10;
       _answersChecked = true;
       _puzzleCompleted = completed;
     });
+
     if (completed) {
       _showCompletionDialog();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            '$correctAnswers of '
-            '$_playableCellCount letters are correct.',
-          ),
+          content: Text('$correctAnswers of $_playableCellCount letters are correct.'),
         ),
       );
     }
   }
+
   Future<void> _showCompletionDialog() async {
     await GameProgress.unlockNextLevel(_level);
-    if (!mounted) {
-      return;
-    }
-    final bool hasNextLevel =
-        _level < GameProgress.totalLevels;
+    if (!mounted) return;
+
+    final bool hasNextLevel = _level < GameProgress.totalLevels;
     final AudioPlayer celebrationPlayer = AudioPlayer();
-    await celebrationPlayer.play(
-      AssetSource('sounds/level_complete.wav'),
-    );
-    if (!mounted) {
-      return;
-    }
+    await celebrationPlayer.play(AssetSource('sounds/level_complete.wav'));
+    if (!mounted) return;
+
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -250,10 +242,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
             size: 58,
             color: Color(0xFFF4C430),
           ),
-          title: const Text(
-            'Puzzle Complete!',
-            textAlign: TextAlign.center,
-          ),
+          title: const Text('Puzzle Complete!', textAlign: TextAlign.center),
           content: Text(
             'Excellent! You completed Level $_level and scored $_score points.',
             textAlign: TextAlign.center,
@@ -273,9 +262,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
                 onPressed: () async {
                   final int nextLevel = _level + 1;
                   await GameProgress.selectLevel(nextLevel);
-                  if (!mounted) {
-                    return;
-                  }
+                  if (!mounted) return;
                   Navigator.of(dialogContext).pop();
                   Navigator.pushReplacementNamed(
                     context,
@@ -283,22 +270,15 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
                     arguments: nextLevel,
                   );
                 },
-                icon: const Icon(
-                  Icons.arrow_forward_rounded,
-                ),
+                icon: const Icon(Icons.arrow_forward_rounded),
                 label: const Text('Next Level'),
               ),
             OutlinedButton.icon(
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                Navigator.pushReplacementNamed(
-                  context,
-                  AppRoutes.levels,
-                );
+                Navigator.pushReplacementNamed(context, AppRoutes.levels);
               },
-              icon: const Icon(
-                Icons.grid_view_rounded,
-              ),
+              icon: const Icon(Icons.grid_view_rounded),
               label: const Text('Levels'),
             ),
           ],
@@ -306,46 +286,36 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
       },
     );
   }
+
   Color _cellBackgroundColor(int index) {
-    if (_puzzle.answers[index] == '#') {
-      return const Color(0xFF172033);
-    }
-    if (_selectedIndex == index) {
-      return const Color(0xFFF4C430);
-    }
-    if (_answersChecked &&
-        _playerAnswers[index].isNotEmpty) {
-      if (_playerAnswers[index] ==
-          _puzzle.answers[index]) {
+    if (_puzzle.answers[index] == '#') return const Color(0xFF172033);
+    if (_selectedIndex == index) return const Color(0xFFF4C430);
+    if (_answersChecked && _playerAnswers[index].isNotEmpty) {
+      if (_playerAnswers[index] == _puzzle.answers[index]) {
         return const Color(0xFFD8F3DC);
       }
       return const Color(0xFFFFD6D6);
     }
     return Colors.white;
   }
+
   Color _cellBorderColor(int index) {
-    if (_selectedIndex == index) {
-      return const Color(0xFF078930);
-    }
-    if (_answersChecked &&
-        _playerAnswers[index].isNotEmpty) {
-      if (_playerAnswers[index] ==
-          _puzzle.answers[index]) {
+    if (_selectedIndex == index) return const Color(0xFF078930);
+    if (_answersChecked && _playerAnswers[index].isNotEmpty) {
+      if (_playerAnswers[index] == _puzzle.answers[index]) {
         return const Color(0xFF078930);
       }
       return const Color(0xFFDA121A);
     }
     return const Color(0xFFB8C0CC);
   }
+
   @override
   Widget build(BuildContext context) {
     if (!_levelLoaded) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       appBar: AppBar(
@@ -354,19 +324,12 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
         centerTitle: true,
         title: Text(
           'Fidel Crossword — Level $_level',
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         leading: IconButton(
           tooltip: 'Back to levels',
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () {
-            Navigator.pushReplacementNamed(
-              context,
-              AppRoutes.levels,
-            );
-          },
+          onPressed: () => Navigator.pushReplacementNamed(context, AppRoutes.levels),
         ),
         actions: <Widget>[
           IconButton(
@@ -381,12 +344,9 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
           padding: const EdgeInsets.all(18),
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 720,
-              ),
+              constraints: const BoxConstraints(maxWidth: 720),
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   _buildInformationCard(),
                   const SizedBox(height: 18),
@@ -408,15 +368,13 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
       ),
     );
   }
+
   Widget _buildInformationCard() {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: <Color>[
-            Color(0xFF075A32),
-            Color(0xFF0B8F46),
-          ],
+          colors: <Color>[Color(0xFF075A32), Color(0xFF0B8F46)],
         ),
         borderRadius: BorderRadius.circular(22),
         boxShadow: <BoxShadow>[
@@ -433,8 +391,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
             children: <Widget>[
               Expanded(
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
                       _puzzle.title,
@@ -447,19 +404,13 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
                     const SizedBox(height: 5),
                     Text(
                       _puzzle.subtitle,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 15,
-                      ),
+                      style: const TextStyle(color: Colors.white70, fontSize: 15),
                     ),
                   ],
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 9,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.16),
                   borderRadius: BorderRadius.circular(16),
@@ -493,20 +444,15 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
             child: LinearProgressIndicator(
               value: _progress,
               minHeight: 10,
-              backgroundColor:
-                  Colors.white.withOpacity(0.25),
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(
-                Color(0xFFF4C430),
-              ),
+              backgroundColor: Colors.white.withOpacity(0.25),
+              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFFF4C430)),
             ),
           ),
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              '$_filledCellCount / '
-              '$_playableCellCount letters',
+              '$_filledCellCount / $_playableCellCount letters',
               style: const TextStyle(
                 color: Colors.white70,
                 fontWeight: FontWeight.w600,
@@ -517,30 +463,23 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
       ),
     );
   }
+
   Widget _buildInstructionsCard() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF4C7),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFFF4C430),
-          width: 1.5,
-        ),
+        border: Border.all(color: const Color(0xFFF4C430), width: 1.5),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Icon(
-            Icons.lightbulb_rounded,
-            color: Color(0xFF8A6800),
-            size: 29,
-          ),
+          const Icon(Icons.lightbulb_rounded, color: Color(0xFF8A6800), size: 29),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 const Text(
                   'Puzzle instructions',
@@ -552,13 +491,8 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  '${_puzzle.instruction} '
-                  'Tap a white square and choose '
-                  'the correct Fidel letter below.',
-                  style: const TextStyle(
-                    color: Color(0xFF594300),
-                    height: 1.4,
-                  ),
+                  '${_puzzle.instruction} Tap a white square and choose the correct Fidel letter below.',
+                  style: const TextStyle(color: Color(0xFF594300), height: 1.4),
                 ),
               ],
             ),
@@ -567,66 +501,50 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
       ),
     );
   }
+
   int _playableNumberForIndex(int targetIndex) {
     int number = 0;
-    for (int index = 0; index <= targetIndex; index++) {
-      if (_puzzle.answers[index] != '#') {
-        number++;
-      }
+    for (int i = 0; i <= targetIndex; i++) {
+      if (_puzzle.answers[i] != '#') number++;
     }
     return number;
   }
+
   Widget _buildCrosswordGrid() {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: 480,
-        ),
+        constraints: const BoxConstraints(maxWidth: 480),
         child: AspectRatio(
           aspectRatio: 1,
           child: GridView.builder(
-            physics:
-                const NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             itemCount: _puzzle.answers.length,
-            gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 5,
               crossAxisSpacing: 5,
               mainAxisSpacing: 5,
             ),
-            itemBuilder: (
-              BuildContext context,
-              int index,
-            ) {
-              final bool isBlocked =
-                  _puzzle.answers[index] == '#';
+            itemBuilder: (BuildContext context, int index) {
+              final bool isBlocked = _puzzle.answers[index] == '#';
               return InkWell(
                 borderRadius: BorderRadius.circular(10),
-                onTap: isBlocked
-                    ? null
-                    : () => _selectCell(index),
+                onTap: isBlocked ? null : () => _selectCell(index),
                 child: AnimatedContainer(
-                  duration:
-                      const Duration(milliseconds: 180),
+                  duration: const Duration(milliseconds: 180),
                   decoration: BoxDecoration(
                     color: _cellBackgroundColor(index),
-                    borderRadius:
-                        BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: _cellBorderColor(index),
-                      width: _selectedIndex == index
-                          ? 3
-                          : 1.5,
+                      width: _selectedIndex == index ? 3 : 1.5,
                     ),
                     boxShadow: isBlocked
                         ? null
                         : <BoxShadow>[
                             BoxShadow(
-                              color: Colors.black
-                                  .withOpacity(0.08),
+                              color: Colors.black.withOpacity(0.08),
                               blurRadius: 5,
-                              offset:
-                                  const Offset(0, 2),
+                              offset: const Offset(0, 2),
                             ),
                           ],
                   ),
@@ -640,11 +558,9 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
                               child: Text(
                                 '${_playableNumberForIndex(index)}',
                                 style: TextStyle(
-                                  color:
-                                      Colors.grey.shade600,
+                                  color: Colors.grey.shade600,
                                   fontSize: 10,
-                                  fontWeight:
-                                      FontWeight.bold,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
@@ -652,11 +568,9 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
                               child: Text(
                                 _playerAnswers[index],
                                 style: const TextStyle(
-                                  color:
-                                      Color(0xFF172033),
+                                  color: Color(0xFF172033),
                                   fontSize: 30,
-                                  fontWeight:
-                                      FontWeight.bold,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
@@ -670,13 +584,11 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
       ),
     );
   }
+
   Widget _buildKeyboardHeading() {
     return const Row(
       children: <Widget>[
-        Icon(
-          Icons.keyboard_rounded,
-          color: Color(0xFF075A32),
-        ),
+        Icon(Icons.keyboard_rounded, color: Color(0xFF075A32)),
         SizedBox(width: 8),
         Text(
           'Choose a Fidel letter',
@@ -689,6 +601,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
       ],
     );
   }
+
   Widget _buildFidelKeyboard() {
     return Wrap(
       spacing: 9,
@@ -702,29 +615,24 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
             onPressed: () => _enterLetter(letter),
             style: FilledButton.styleFrom(
               backgroundColor: Colors.white,
-              foregroundColor:
-                  const Color(0xFF075A32),
+              foregroundColor: const Color(0xFF075A32),
               elevation: 2,
               padding: EdgeInsets.zero,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(13),
-                side: const BorderSide(
-                  color: Color(0xFFB7D8C5),
-                ),
+                side: const BorderSide(color: Color(0xFFB7D8C5)),
               ),
             ),
             child: Text(
               letter,
-              style: const TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
             ),
           ),
         );
       }).toList(),
     );
   }
+
   Widget _buildActionButtons() {
     return Column(
       children: <Widget>[
@@ -733,21 +641,14 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: _clearSelectedCell,
-                icon: const Icon(
-                  Icons.backspace_rounded,
-                ),
+                icon: const Icon(Icons.backspace_rounded),
                 label: const Text('Clear'),
                 style: OutlinedButton.styleFrom(
-                  minimumSize:
-                      const Size.fromHeight(52),
-                  foregroundColor:
-                      const Color(0xFF075A32),
-                  side: const BorderSide(
-                    color: Color(0xFF075A32),
-                  ),
+                  minimumSize: const Size.fromHeight(52),
+                  foregroundColor: const Color(0xFF075A32),
+                  side: const BorderSide(color: Color(0xFF075A32)),
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),
@@ -756,21 +657,14 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: _resetPuzzle,
-                icon: const Icon(
-                  Icons.refresh_rounded,
-                ),
+                icon: const Icon(Icons.refresh_rounded),
                 label: const Text('Reset'),
                 style: OutlinedButton.styleFrom(
-                  minimumSize:
-                      const Size.fromHeight(52),
-                  foregroundColor:
-                      const Color(0xFFDA121A),
-                  side: const BorderSide(
-                    color: Color(0xFFDA121A),
-                  ),
+                  minimumSize: const Size.fromHeight(52),
+                  foregroundColor: const Color(0xFFDA121A),
+                  side: const BorderSide(color: Color(0xFFDA121A)),
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                 ),
               ),
@@ -782,34 +676,25 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
           width: double.infinity,
           child: FilledButton.icon(
             onPressed: _checkAnswers,
-            icon: const Icon(
-              Icons.check_circle_rounded,
-            ),
+            icon: const Icon(Icons.check_circle_rounded),
             label: const Text(
               'Check Answers',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
             ),
             style: FilledButton.styleFrom(
-              backgroundColor:
-                  const Color(0xFF078930),
+              backgroundColor: const Color(0xFF078930),
               foregroundColor: Colors.white,
-              minimumSize:
-                  const Size.fromHeight(58),
+              minimumSize: const Size.fromHeight(58),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
             ),
           ),
         ),
-        if (_answersChecked &&
-            !_puzzleCompleted) ...<Widget>[
+        if (_answersChecked && !_puzzleCompleted) ...<Widget>[
           const SizedBox(height: 12),
           Text(
-            'Green squares are correct. '
-            'Red squares need another try.',
+            'Green squares are correct. Red squares need another try.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.grey.shade700,
@@ -821,6 +706,7 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
     );
   }
 }
+
 class _PuzzleData {
   const _PuzzleData({
     required this.title,
@@ -829,6 +715,7 @@ class _PuzzleData {
     required this.answers,
     required this.keyboard,
   });
+
   final String title;
   final String subtitle;
   final String instruction;
