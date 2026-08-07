@@ -30,19 +30,19 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
     if (index == 2) {
       return const _PuzzleData(
-        title: 'Level 3 — Mixed Family Challenge',
-        subtitle: 'Review seven different Fidel families together.',
+        title: 'Level 3 — ሐ Family Challenge',
+        subtitle: 'Mix and master all seven forms of ሐ.',
         instruction:
-            'Place the seven family letters in the correct order: ሀ, ለ, ሐ, መ, ሠ, ረ, ሰ.',
+            'Place the seven ሐ family letters in the correct order from ሐ to ሖ.',
         answers: <String>[
-          'ሀ', 'ለ', 'ሐ', '#', '#',
-          '#', '#', 'መ', '#', '#',
-          '#', '#', 'ሠ', 'ረ', 'ሰ',
+          '#', '#', '#', '#', 'ሐ',
+          '#', '#', '#', '#', 'ሑ',
+          'ሒ', 'ሓ', 'ሔ', 'ሕ', 'ሖ',
           '#', '#', '#', '#', '#',
           '#', '#', '#', '#', '#',
         ],
         keyboard: <String>[
-          'ረ', 'ሀ', 'ሠ', 'ሐ', 'ሰ', 'ለ', 'መ', 'ሑ', 'ሙ', 'ሱ',
+          'ሔ', 'ሐ', 'ሖ', 'ሒ', 'ሕ', 'ሑ', 'ሓ', 'ሉ', 'መ', 'ሰ',
         ],
       );
     }
