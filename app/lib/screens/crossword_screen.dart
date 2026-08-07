@@ -22,28 +22,43 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
   bool _answersChecked = false;
   bool _puzzleCompleted = false;
 
+  static const List<String> _familyStartersInOrder = <String>[
+    'ሀ', 'ለ', 'ሐ', 'መ', 'ሠ', 'ረ', 'ሰ', 'ሸ', 'ቀ', 'በ', 'ተ', 'ቸ',
+    'ኀ', 'ነ', 'ኘ', 'አ', 'ከ', 'ኸ', 'ወ', 'ዐ', 'ዘ', 'ዠ', 'የ', 'ደ',
+    'ጀ', 'ገ', 'ጠ', 'ጨ', 'ጰ', 'ጸ', 'ፀ', 'ፈ', 'ፐ', 'ቨ',
+  ];
+
+  static const List<String> _familyStartersShuffled = <String>[
+    'የ', 'ሠ', 'ቸ', 'ፐ', 'ነ', 'ሀ', 'ጨ', 'ዐ', 'ቀ', 'ፈ', 'ጀ', 'ረ',
+    'ኸ', 'ዠ', 'መ', 'ፀ', 'በ', 'ሸ', 'አ', 'ጰ', 'ሐ', 'ደ', 'ኘ', 'ቨ',
+    'ሰ', 'ጠ', 'ለ', 'ጸ', 'ዘ', 'ኀ', 'ገ', 'ተ', 'ከ', 'ወ',
+  ];
+
   static final List<_PuzzleData> _puzzles =
       List<_PuzzleData>.generate(fidelFamilies.length, (int index) {
     final List<String> family = fidelFamilies[index];
     final List<String> previousFamily =
         fidelFamilies[(index - 1 + fidelFamilies.length) % fidelFamilies.length];
 
+    if (index == 0) {
+      return const _PuzzleData(
+        title: 'Level 1 — Learn the 34 Fidel Families',
+        subtitle: 'Learn the first letter of every Fidel family in order.',
+        instruction:
+            'Follow the 34 numbered boxes from 1 to 34 and place each family starter in the correct family order.',
+        answers: _familyStartersInOrder,
+        keyboard: _familyStartersInOrder,
+      );
+    }
+
     if (index == 2) {
       return const _PuzzleData(
-        title: 'Level 3 — Mixed Family Challenge',
-        subtitle: 'A harder review using seven different Fidel families.',
+        title: 'Level 3 — 34 Family Mixed Challenge',
+        subtitle: 'All 34 Fidel family starters are mixed for a harder challenge.',
         instruction:
-            'Place these seven family letters in the correct numbered boxes: ሀ, ለ, ሐ, መ, ሠ, ረ, ሰ.',
-        answers: <String>[
-          '#', '#', '#', '#', 'ሀ',
-          '#', '#', '#', '#', 'ለ',
-          'ሐ', 'መ', 'ሠ', 'ረ', 'ሰ',
-          '#', '#', '#', '#', '#',
-          '#', '#', '#', '#', '#',
-        ],
-        keyboard: <String>[
-          'ረ', 'ሑ', 'ሀ', 'ሙ', 'ሠ', 'ሰ', 'ለ', 'ሱ', 'መ', 'ሐ',
-        ],
+            'The 34 family starters below are mixed. Put every first letter back into the correct family order from box 1 to box 34.',
+        answers: _familyStartersInOrder,
+        keyboard: _familyStartersShuffled,
       );
     }
 
@@ -111,6 +126,8 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
   double get _progress =>
       _playableCellCount == 0 ? 0 : _filledCellCount / _playableCellCount;
+
+  bool get _usesThirtyFourFamilyGrid => _level == 1 || _level == 3;
 
   void _selectCell(int index) {
     if (_puzzle.answers[index] == '#') return;
@@ -492,18 +509,23 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
   }
 
   Widget _buildCrosswordGrid() {
+    final int columns = _usesThirtyFourFamilyGrid ? 6 : 5;
+    final int rows = (_puzzle.answers.length / columns).ceil();
+    final double gridHeight = _usesThirtyFourFamilyGrid ? rows * 78.0 : 480.0;
+
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480),
-        child: AspectRatio(
-          aspectRatio: 1,
+        constraints: const BoxConstraints(maxWidth: 540),
+        child: SizedBox(
+          height: gridHeight,
           child: GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _puzzle.answers.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 5,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
               crossAxisSpacing: 5,
               mainAxisSpacing: 5,
+              childAspectRatio: 1,
             ),
             itemBuilder: (BuildContext context, int index) {
               final bool isBlocked = _puzzle.answers[index] == '#';
@@ -548,9 +570,9 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
                             Center(
                               child: Text(
                                 _playerAnswers[index],
-                                style: const TextStyle(
-                                  color: Color(0xFF172033),
-                                  fontSize: 30,
+                                style: TextStyle(
+                                  color: const Color(0xFF172033),
+                                  fontSize: _usesThirtyFourFamilyGrid ? 24 : 30,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -590,8 +612,8 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
       alignment: WrapAlignment.center,
       children: _puzzle.keyboard.map((String letter) {
         return SizedBox(
-          width: 67,
-          height: 57,
+          width: _usesThirtyFourFamilyGrid ? 56 : 67,
+          height: _usesThirtyFourFamilyGrid ? 50 : 57,
           child: FilledButton(
             onPressed: () => _enterLetter(letter),
             style: FilledButton.styleFrom(
@@ -606,7 +628,10 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
             ),
             child: Text(
               letter,
-              style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: _usesThirtyFourFamilyGrid ? 22 : 25,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         );
