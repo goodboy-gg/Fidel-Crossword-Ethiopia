@@ -1,4 +1,4 @@
-/// The 34 Ethiopian Fidel families used by the game.
+/// The 33 Ethiopian Fidel families used by the game.
 const List<List<String>> fidelFamilies = <List<String>>[
   <String>['ሀ', 'ሁ', 'ሂ', 'ሃ', 'ሄ', 'ህ', 'ሆ'],
   <String>['ለ', 'ሉ', 'ሊ', 'ላ', 'ሌ', 'ል', 'ሎ'],
@@ -10,7 +10,6 @@ const List<List<String>> fidelFamilies = <List<String>>[
   <String>['ሸ', 'ሹ', 'ሺ', 'ሻ', 'ሼ', 'ሽ', 'ሾ'],
   <String>['ቀ', 'ቁ', 'ቂ', 'ቃ', 'ቄ', 'ቅ', 'ቆ'],
   <String>['በ', 'ቡ', 'ቢ', 'ባ', 'ቤ', 'ብ', 'ቦ'],
-  <String>['ቨ', 'ቩ', 'ቪ', 'ቫ', 'ቬ', 'ቭ', 'ቮ'],
   <String>['ተ', 'ቱ', 'ቲ', 'ታ', 'ቴ', 'ት', 'ቶ'],
   <String>['ቸ', 'ቹ', 'ቺ', 'ቻ', 'ቼ', 'ች', 'ቾ'],
   <String>['ኀ', 'ኁ', 'ኂ', 'ኃ', 'ኄ', 'ኅ', 'ኆ'],
@@ -36,6 +35,6 @@ const List<List<String>> fidelFamilies = <List<String>>[
   <String>['ፐ', 'ፑ', 'ፒ', 'ፓ', 'ፔ', 'ፕ', 'ፖ'],
 ];
 
-const int totalFidelFamilies = 34;
+const int totalFidelFamilies = 33;
 
 String fidelFamilyName(int level) => fidelFamilies[level - 1].first;
