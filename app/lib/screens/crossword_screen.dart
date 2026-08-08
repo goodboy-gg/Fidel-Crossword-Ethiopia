@@ -77,6 +77,14 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
     _puzzleCompleted = false;
   }
 
+  void _goToFamily(int level) {
+    if (level < 1 || level > _puzzles.length) return;
+    setState(() {
+      _level = level;
+      _loadPuzzle();
+    });
+  }
+
   int get _playableCellCount =>
       _puzzle.answers.where((String letter) => letter != '#').length;
 
@@ -632,6 +640,44 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
                   minimumSize: const Size.fromHeight(52),
                   foregroundColor: const Color(0xFFDA121A),
                   side: const BorderSide(color: Color(0xFFDA121A)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 11),
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _level > 1 ? () => _goToFamily(_level - 1) : null,
+                icon: const Icon(Icons.arrow_back_rounded),
+                label: const Text('Previous Family'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  foregroundColor: const Color(0xFF075A32),
+                  side: const BorderSide(color: Color(0xFF075A32)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: _level < _puzzles.length
+                    ? () => _goToFamily(_level + 1)
+                    : null,
+                icon: const Icon(Icons.arrow_forward_rounded),
+                label: const Text('Next Family'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  foregroundColor: const Color(0xFF075A32),
+                  side: const BorderSide(color: Color(0xFF075A32)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
