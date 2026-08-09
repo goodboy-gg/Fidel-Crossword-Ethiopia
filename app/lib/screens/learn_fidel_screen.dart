@@ -21,7 +21,6 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
 
   String _audioFileForLetter(String letter) {
     final String unicode = letter.runes.first.toRadixString(16).toLowerCase();
-
     return 'sounds/fidel_$unicode.m4a';
   }
 
@@ -33,20 +32,14 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
 
     try {
       await _audioPlayer.stop();
-
       await _audioPlayer.play(AssetSource(_audioFileForLetter(letter)));
     } catch (_) {
-      if (!mounted) {
-        return;
-      }
-
+      if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text(
-              'The sound for $letter will be added in the next step.',
-            ),
+            content: Text('The sound for $letter will be added in the next step.'),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -66,7 +59,6 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
       } else {
         _selectedFamilyIndex--;
       }
-
       _selectedLetter = null;
     });
   }
@@ -78,7 +70,6 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
       } else {
         _selectedFamilyIndex++;
       }
-
       _selectedLetter = null;
     });
   }
@@ -114,15 +105,16 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
                         child: Column(
                           children: <Widget>[
                             Text(
-                              'Family ${_selectedFamilyIndex + 1} '
-                              'of $totalFidelFamilies',
+                              'Family ${_selectedFamilyIndex + 1} of $totalFidelFamilies',
                               style: theme.textTheme.titleMedium,
                             ),
                             const SizedBox(height: 6),
                             Text(
                               _selectedFamily.first,
-                              style: theme.textTheme.displayMedium?.copyWith(
+                              style: const TextStyle(
+                                fontSize: 46,
                                 fontWeight: FontWeight.bold,
+                                color: Colors.black87,
                               ),
                             ),
                           ],
@@ -186,19 +178,21 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
                           children: <Widget>[
                             Text(
                               letter,
-                              style: theme.textTheme.displaySmall?.copyWith(
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 58,
+                                height: 1.0,
                                 fontWeight: FontWeight.bold,
-                                color: isSelected
-                                    ? theme.colorScheme.onPrimaryContainer
-                                    : theme.colorScheme.onSurface,
+                                color: Colors.black87,
                               ),
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 8),
                             Icon(
                               isSelected && _isPlaying
                                   ? Icons.volume_up_rounded
                                   : Icons.volume_down_rounded,
                               size: 24,
+                              color: Colors.black87,
                             ),
                           ],
                         ),
