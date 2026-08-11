@@ -19,10 +19,8 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
 
   List<String> get _selectedFamily => fidelFamilies[_selectedFamilyIndex];
 
-  String _audioFileForSelectedFamily() {
-    final String familyStarter = _selectedFamily.first;
-    final String unicode =
-        familyStarter.runes.first.toRadixString(16).toLowerCase();
+  String _audioFileForLetter(String letter) {
+    final String unicode = letter.runes.first.toRadixString(16).toLowerCase();
     return 'sounds/fidel_$unicode.m4a';
   }
 
@@ -34,16 +32,14 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
 
     try {
       await _audioPlayer.stop();
-      await _audioPlayer.play(AssetSource(_audioFileForSelectedFamily()));
+      await _audioPlayer.play(AssetSource(_audioFileForLetter(letter)));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text(
-              'The sound for the ${_selectedFamily.first} family is not available yet.',
-            ),
+            content: Text('The sound for $letter is not available yet.'),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -137,7 +133,7 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                'Tap each Fidel letter to hear its family sound.',
+                'Tap each Fidel letter to hear its sound.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge,
               ),
