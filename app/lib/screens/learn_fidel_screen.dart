@@ -21,7 +21,7 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
 
   String _audioFileForLetter(String letter) {
     final String unicode = letter.runes.first.toRadixString(16).toLowerCase();
-    return 'sounds/fidel_$unicode.m4a';
+    return 'sounds/fidel_$unicode.wav';
   }
 
   Future<void> _playLetter(String letter) async {
