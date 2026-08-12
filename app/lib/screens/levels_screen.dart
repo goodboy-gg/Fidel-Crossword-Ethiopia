@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../game_progress.dart';
 import '../fidel_families.dart';
 import 'challenge_crossword_screen.dart';
-import 'level2_pronunciation_screen.dart';
 
 class LevelsScreen extends StatefulWidget {
   const LevelsScreen({super.key});
@@ -47,13 +46,11 @@ class _LevelsScreenState extends State<LevelsScreen> {
 
     GameProgress.selectLevel(level);
 
-    final Widget screen = level == 2
-        ? const Level2PronunciationScreen()
-        : ChallengeCrosswordScreen(level: level);
-
     Navigator.push(
       context,
-      MaterialPageRoute<void>(builder: (_) => screen),
+      MaterialPageRoute<void>(
+        builder: (_) => ChallengeCrosswordScreen(level: level),
+      ),
     ).then((_) {
       if (mounted) {
         setState(() {});
