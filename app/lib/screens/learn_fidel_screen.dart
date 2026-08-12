@@ -14,38 +14,40 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   int _selectedFamilyIndex = 0;
+  String? _selectedLetter;
   bool _isPlaying = false;
 
   List<String> get _selectedFamily => fidelFamilies[_selectedFamilyIndex];
 
-  String get _selectedFamilyAudio {
-    final String starter = _selectedFamily.first;
-    final String unicode = starter.runes.first.toRadixString(16).toLowerCase();
+  String _audioFileForLetter(String letter) {
+    final String unicode = letter.runes.first.toRadixString(16).toLowerCase();
     return 'sounds/fidel_$unicode.m4a';
   }
 
-  Future<void> _playFamilyPronunciation() async {
-    if (_isPlaying) return;
-
-    setState(() => _isPlaying = true);
+  Future<void> _playLetter(String letter) async {
+    setState(() {
+      _selectedLetter = letter;
+      _isPlaying = true;
+    });
 
     try {
       await _audioPlayer.stop();
-      await _audioPlayer.play(AssetSource(_selectedFamilyAudio));
+      await _audioPlayer.play(AssetSource(_audioFileForLetter(letter)));
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text(
-              'The pronunciation for ${_selectedFamily.first} family is not available.',
-            ),
+            content: Text('The pronunciation recording for $letter is not available yet.'),
+            duration: const Duration(seconds: 2),
           ),
         );
     } finally {
       if (mounted) {
-        setState(() => _isPlaying = false);
+        setState(() {
+          _isPlaying = false;
+        });
       }
     }
   }
@@ -54,6 +56,7 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
     _audioPlayer.stop();
     setState(() {
       _selectedFamilyIndex = index;
+      _selectedLetter = null;
       _isPlaying = false;
     });
   }
@@ -118,22 +121,6 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
                                 color: Colors.black87,
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            FilledButton.icon(
-                              onPressed: _isPlaying
-                                  ? null
-                                  : _playFamilyPronunciation,
-                              icon: Icon(
-                                _isPlaying
-                                    ? Icons.volume_up_rounded
-                                    : Icons.play_circle_fill_rounded,
-                              ),
-                              label: Text(
-                                _isPlaying
-                                    ? 'Playing…'
-                                    : 'Play ${_selectedFamily.first} pronunciation',
-                              ),
-                            ),
                           ],
                         ),
                       ),
@@ -150,7 +137,7 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                'Listen to the family pronunciation, then study its seven Fidel forms.',
+                'Tap each Fidel box to hear that letter’s pronunciation.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge,
               ),
@@ -167,21 +154,52 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
                 ),
                 itemBuilder: (BuildContext context, int index) {
                   final String letter = _selectedFamily[index];
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
+                  final bool isSelected = _selectedLetter == letter;
+
+                  return Semantics(
+                    button: true,
+                    label: 'Play pronunciation for Fidel letter $letter',
+                    child: InkWell(
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: theme.colorScheme.outlineVariant),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      letter,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 58,
-                        height: 1.0,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                      onTap: () => _playLetter(letter),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? theme.colorScheme.primaryContainer
+                              : theme.colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.outlineVariant,
+                            width: isSelected ? 3 : 1,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              letter,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 58,
+                                height: 1.0,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Icon(
+                              isSelected && _isPlaying
+                                  ? Icons.volume_up_rounded
+                                  : Icons.volume_down_rounded,
+                              size: 24,
+                              color: Colors.black87,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );
