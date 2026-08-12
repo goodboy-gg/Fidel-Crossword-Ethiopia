@@ -1,4 +1,3 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
 import '../fidel_families.dart';
@@ -11,48 +10,9 @@ class LearnFidelScreen extends StatefulWidget {
 }
 
 class _LearnFidelScreenState extends State<LearnFidelScreen> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
-
   int _selectedFamilyIndex = 0;
-  String? _selectedLetter;
-  bool _isPlaying = false;
 
   List<String> get _selectedFamily => fidelFamilies[_selectedFamilyIndex];
-
-  String _audioFileForLetter(String letter) {
-    final String unicode = letter.runes.first.toRadixString(16).toLowerCase();
-    return 'sounds/fidel_$unicode.m4a';
-  }
-
-  Future<void> _playLetter(String letter) async {
-    setState(() {
-      _selectedLetter = letter;
-      _isPlaying = true;
-    });
-
-    try {
-      await _audioPlayer.stop();
-      await _audioPlayer.play(
-        AssetSource(_audioFileForLetter(_selectedFamily.first)),
-      );
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text('The sound for ${_selectedFamily.first} family is not available yet.'),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isPlaying = false;
-        });
-      }
-    }
-  }
 
   void _selectPreviousFamily() {
     setState(() {
@@ -61,7 +21,6 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
       } else {
         _selectedFamilyIndex--;
       }
-      _selectedLetter = null;
     });
   }
 
@@ -72,14 +31,7 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
       } else {
         _selectedFamilyIndex++;
       }
-      _selectedLetter = null;
     });
-  }
-
-  @override
-  void dispose() {
-    _audioPlayer.dispose();
-    super.dispose();
   }
 
   @override
@@ -135,7 +87,7 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                'Tap any Fidel box to hear this family sound.',
+                'Study the seven Fidel forms in each family.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge,
               ),
@@ -152,52 +104,21 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
                 ),
                 itemBuilder: (BuildContext context, int index) {
                   final String letter = _selectedFamily[index];
-                  final bool isSelected = _selectedLetter == letter;
-
-                  return Semantics(
-                    button: true,
-                    label: 'Fidel letter $letter',
-                    child: InkWell(
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(20),
-                      onTap: () => _playLetter(letter),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? theme.colorScheme.primaryContainer
-                              : theme.colorScheme.surfaceContainerHighest,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: isSelected
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.outlineVariant,
-                            width: isSelected ? 3 : 1,
-                          ),
-                        ),
-                        alignment: Alignment.center,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              letter,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 58,
-                                height: 1.0,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Icon(
-                              isSelected && _isPlaying
-                                  ? Icons.volume_up_rounded
-                                  : Icons.volume_down_rounded,
-                              size: 24,
-                              color: Colors.black87,
-                            ),
-                          ],
-                        ),
+                      border: Border.all(color: theme.colorScheme.outlineVariant),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      letter,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 58,
+                        height: 1.0,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
                   );
@@ -214,14 +135,12 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
                     const SizedBox(width: 8),
                 itemBuilder: (BuildContext context, int index) {
                   final bool isSelected = index == _selectedFamilyIndex;
-
                   return ChoiceChip(
                     selected: isSelected,
                     label: Text('${index + 1}. ${fidelFamilies[index].first}'),
                     onSelected: (_) {
                       setState(() {
                         _selectedFamilyIndex = index;
-                        _selectedLetter = null;
                       });
                     },
                   );
