@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
 import '../fidel_families.dart';
@@ -10,28 +11,71 @@ class LearnFidelScreen extends StatefulWidget {
 }
 
 class _LearnFidelScreenState extends State<LearnFidelScreen> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
   int _selectedFamilyIndex = 0;
+  bool _isPlaying = false;
 
   List<String> get _selectedFamily => fidelFamilies[_selectedFamilyIndex];
 
-  void _selectPreviousFamily() {
-    setState(() {
-      if (_selectedFamilyIndex == 0) {
-        _selectedFamilyIndex = fidelFamilies.length - 1;
-      } else {
-        _selectedFamilyIndex--;
+  String get _selectedFamilyAudio {
+    final String starter = _selectedFamily.first;
+    final String unicode = starter.runes.first.toRadixString(16).toLowerCase();
+    return 'sounds/fidel_$unicode.m4a';
+  }
+
+  Future<void> _playFamilyPronunciation() async {
+    if (_isPlaying) return;
+
+    setState(() => _isPlaying = true);
+
+    try {
+      await _audioPlayer.stop();
+      await _audioPlayer.play(AssetSource(_selectedFamilyAudio));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              'The pronunciation for ${_selectedFamily.first} family is not available.',
+            ),
+          ),
+        );
+    } finally {
+      if (mounted) {
+        setState(() => _isPlaying = false);
       }
+    }
+  }
+
+  void _selectFamily(int index) {
+    _audioPlayer.stop();
+    setState(() {
+      _selectedFamilyIndex = index;
+      _isPlaying = false;
     });
   }
 
+  void _selectPreviousFamily() {
+    final int index = _selectedFamilyIndex == 0
+        ? fidelFamilies.length - 1
+        : _selectedFamilyIndex - 1;
+    _selectFamily(index);
+  }
+
   void _selectNextFamily() {
-    setState(() {
-      if (_selectedFamilyIndex == fidelFamilies.length - 1) {
-        _selectedFamilyIndex = 0;
-      } else {
-        _selectedFamilyIndex++;
-      }
-    });
+    final int index = _selectedFamilyIndex == fidelFamilies.length - 1
+        ? 0
+        : _selectedFamilyIndex + 1;
+    _selectFamily(index);
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
   }
 
   @override
@@ -39,7 +83,10 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
     final ThemeData theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Learn Fidel'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('Level 2 — Learn Fidel'),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: Column(
           children: <Widget>[
@@ -71,6 +118,22 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
                                 color: Colors.black87,
                               ),
                             ),
+                            const SizedBox(height: 12),
+                            FilledButton.icon(
+                              onPressed: _isPlaying
+                                  ? null
+                                  : _playFamilyPronunciation,
+                              icon: Icon(
+                                _isPlaying
+                                    ? Icons.volume_up_rounded
+                                    : Icons.play_circle_fill_rounded,
+                              ),
+                              label: Text(
+                                _isPlaying
+                                    ? 'Playing…'
+                                    : 'Play ${_selectedFamily.first} pronunciation',
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -87,7 +150,7 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                'Study the seven Fidel forms in each family.',
+                'Listen to the family pronunciation, then study its seven Fidel forms.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge,
               ),
@@ -138,11 +201,7 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
                   return ChoiceChip(
                     selected: isSelected,
                     label: Text('${index + 1}. ${fidelFamilies[index].first}'),
-                    onSelected: (_) {
-                      setState(() {
-                        _selectedFamilyIndex = index;
-                      });
-                    },
+                    onSelected: (_) => _selectFamily(index),
                   );
                 },
               ),
