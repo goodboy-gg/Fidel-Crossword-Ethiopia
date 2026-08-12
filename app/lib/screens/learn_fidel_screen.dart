@@ -32,14 +32,16 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
 
     try {
       await _audioPlayer.stop();
-      await _audioPlayer.play(AssetSource(_audioFileForLetter(letter)));
+      await _audioPlayer.play(
+        AssetSource(_audioFileForLetter(_selectedFamily.first)),
+      );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text('The sound for $letter is not available yet.'),
+            content: Text('The sound for ${_selectedFamily.first} family is not available yet.'),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -133,7 +135,7 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                'Tap each Fidel letter to hear its sound.',
+                'Tap any Fidel box to hear this family sound.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge,
               ),
