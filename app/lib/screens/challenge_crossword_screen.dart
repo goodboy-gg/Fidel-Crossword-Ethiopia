@@ -26,6 +26,7 @@ class _ChallengeCrosswordScreenState extends State<ChallengeCrosswordScreen> {
   bool _puzzleCompleted = false;
 
   List<String> get _family => fidelFamilies[widget.level - 1];
+  bool get _isBeginnerLevel => widget.level == 1;
 
   @override
   void initState() {
@@ -35,8 +36,6 @@ class _ChallengeCrosswordScreenState extends State<ChallengeCrosswordScreen> {
 
   void _loadPuzzle() {
     final List<String> family = _family;
-    final List<String> previousFamily = fidelFamilies[
-        (widget.level - 2 + fidelFamilies.length) % fidelFamilies.length];
 
     _answers = <String>[
       family[0], family[1], family[2], '#', '#',
@@ -46,17 +45,24 @@ class _ChallengeCrosswordScreenState extends State<ChallengeCrosswordScreen> {
       '#', '#', '#', '#', '#',
     ];
 
-    final List<String> choices = <String>[
-      ...family,
-      previousFamily[0],
-      previousFamily[1],
-      previousFamily[2],
-    ];
+    if (_isBeginnerLevel) {
+      // Level 1 teaches the player how the crossword works. Keep only the
+      // seven letters from the ሀ family and show them in their natural order.
+      _keyboard = List<String>.from(family);
+    } else {
+      final List<String> previousFamily = fidelFamilies[
+          (widget.level - 2 + fidelFamilies.length) % fidelFamilies.length];
+      final List<String> choices = <String>[
+        ...family,
+        previousFamily[0],
+        previousFamily[1],
+        previousFamily[2],
+      ];
 
-    // Fixed mixed order: every challenge opens mixed, while the correct
-    // family itself and crossword answers remain unchanged.
-    const List<int> mixedOrder = <int>[4, 0, 8, 2, 6, 9, 1, 7, 5, 3];
-    _keyboard = mixedOrder.map((int i) => choices[i]).toList();
+      // Later levels stay mixed so they remain recognition challenges.
+      const List<int> mixedOrder = <int>[4, 0, 8, 2, 6, 9, 1, 7, 5, 3];
+      _keyboard = mixedOrder.map((int i) => choices[i]).toList();
+    }
 
     _playerAnswers = List<String>.filled(_answers.length, '');
     _selectedIndex = null;
@@ -183,9 +189,14 @@ class _ChallengeCrosswordScreenState extends State<ChallengeCrosswordScreen> {
             size: 58,
             color: Color(0xFFF4C430),
           ),
-          title: const Text('Challenge Complete!', textAlign: TextAlign.center),
+          title: Text(
+            _isBeginnerLevel ? 'Level Complete!' : 'Challenge Complete!',
+            textAlign: TextAlign.center,
+          ),
           content: Text(
-            'Excellent! You solved the ${_family.first} family challenge and scored $_score points.',
+            _isBeginnerLevel
+                ? 'Excellent! You completed the beginner ${_family.first} family crossword and scored $_score points.'
+                : 'Excellent! You solved the ${_family.first} family challenge and scored $_score points.',
             textAlign: TextAlign.center,
           ),
           actionsAlignment: MainAxisAlignment.center,
@@ -204,7 +215,7 @@ class _ChallengeCrosswordScreenState extends State<ChallengeCrosswordScreen> {
                 Navigator.of(context).pop();
               },
               icon: const Icon(Icons.grid_view_rounded),
-              label: const Text('Challenges'),
+              label: Text(_isBeginnerLevel ? 'Levels' : 'Challenges'),
             ),
           ],
         );
@@ -250,12 +261,14 @@ class _ChallengeCrosswordScreenState extends State<ChallengeCrosswordScreen> {
         foregroundColor: Colors.white,
         centerTitle: true,
         title: Text(
-          'Challenge ${widget.level} — ${_family.first} Family',
+          _isBeginnerLevel
+              ? 'Level 1 — ${_family.first} Family'
+              : 'Challenge ${widget.level} — ${_family.first} Family',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: <Widget>[
           IconButton(
-            tooltip: 'Reset challenge',
+            tooltip: _isBeginnerLevel ? 'Reset level' : 'Reset challenge',
             onPressed: _resetPuzzle,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -309,7 +322,9 @@ class _ChallengeCrosswordScreenState extends State<ChallengeCrosswordScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      '${_family.first} Family Challenge',
+                      _isBeginnerLevel
+                          ? 'Learn How to Play — ${_family.first} Family'
+                          : '${_family.first} Family Challenge',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 21,
@@ -318,7 +333,9 @@ class _ChallengeCrosswordScreenState extends State<ChallengeCrosswordScreen> {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      'The letters are mixed. Put ${_family.first} to ${_family.last} in the correct crossword squares.',
+                      _isBeginnerLevel
+                          ? 'Start with the seven ${_family.first} family letters. Put ${_family.first} to ${_family.last} in the correct crossword squares.'
+                          : 'The letters are mixed. Put ${_family.first} to ${_family.last} in the correct crossword squares.',
                       style: const TextStyle(color: Colors.white70, fontSize: 15),
                     ),
                   ],
@@ -387,15 +404,17 @@ class _ChallengeCrosswordScreenState extends State<ChallengeCrosswordScreen> {
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: const Color(0xFFF4C430), width: 1.5),
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(Icons.lightbulb_rounded, color: Color(0xFF8A6800), size: 29),
-          SizedBox(width: 12),
+          const Icon(Icons.lightbulb_rounded, color: Color(0xFF8A6800), size: 29),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Tap a white square, then choose from the mixed Fidel letters below.',
-              style: TextStyle(color: Color(0xFF594300), height: 1.4),
+              _isBeginnerLevel
+                  ? 'Tap a white square, then choose the matching Fidel letter below. The seven letters are shown in order to help you learn how to play.'
+                  : 'Tap a white square, then choose from the mixed Fidel letters below.',
+              style: const TextStyle(color: Color(0xFF594300), height: 1.4),
             ),
           ),
         ],
@@ -471,13 +490,18 @@ class _ChallengeCrosswordScreenState extends State<ChallengeCrosswordScreen> {
   }
 
   Widget _buildKeyboardHeading() {
-    return const Row(
+    return Row(
       children: <Widget>[
-        Icon(Icons.shuffle_rounded, color: Color(0xFFDA121A)),
-        SizedBox(width: 8),
+        Icon(
+          _isBeginnerLevel ? Icons.school_rounded : Icons.shuffle_rounded,
+          color: const Color(0xFFDA121A),
+        ),
+        const SizedBox(width: 8),
         Text(
-          'Choose from the mixed Fidel letters',
-          style: TextStyle(
+          _isBeginnerLevel
+              ? 'Choose a Fidel letter'
+              : 'Choose from the mixed Fidel letters',
+          style: const TextStyle(
             color: Color(0xFF172033),
             fontSize: 18,
             fontWeight: FontWeight.bold,
