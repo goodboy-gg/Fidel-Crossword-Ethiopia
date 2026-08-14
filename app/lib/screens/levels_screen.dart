@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../app/app_routes.dart';
 import '../game_progress.dart';
 import '../fidel_families.dart';
-import 'challenge_crossword_screen.dart';
 
 class LevelsScreen extends StatefulWidget {
   const LevelsScreen({super.key});
@@ -32,7 +32,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
     });
   }
 
-  void _openLevel(BuildContext context, int level) {
+  Future<void> _openLevel(BuildContext context, int level) async {
     if (!GameProgress.isLevelUnlocked(level)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -44,18 +44,21 @@ class _LevelsScreenState extends State<LevelsScreen> {
       return;
     }
 
-    GameProgress.selectLevel(level);
+    await GameProgress.selectLevel(level);
 
-    Navigator.push(
+    if (!mounted) {
+      return;
+    }
+
+    await Navigator.pushNamed(
       context,
-      MaterialPageRoute<void>(
-        builder: (_) => ChallengeCrosswordScreen(level: level),
-      ),
-    ).then((_) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
+      AppRoutes.crossword,
+      arguments: level,
+    );
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _resetProgress() async {
