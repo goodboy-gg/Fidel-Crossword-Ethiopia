@@ -31,12 +31,16 @@ class AppRouter {
       case AppRoutes.crossword:
         final Object? argument = settings.arguments;
         final int level = argument is int ? argument : 1;
+        final RouteSettings crosswordSettings = RouteSettings(
+          name: AppRoutes.crossword,
+          arguments: level,
+        );
 
         return MaterialPageRoute<void>(
           builder: (_) => level == 3
               ? const Level3FamilyChallengeScreen()
               : const CrosswordScreen(),
-          settings: settings,
+          settings: crosswordSettings,
         );
       case AppRoutes.placeholder:
         return MaterialPageRoute<void>(
