@@ -21,7 +21,6 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
   int? _selectedIndex;
   int _score = 0;
   bool _answersChecked = false;
-  bool _familyCompleted = false;
 
   List<String> get _family => fidelFamilies[_familyIndex];
 
@@ -55,7 +54,6 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
     _selectedIndex = null;
     _score = 0;
     _answersChecked = false;
-    _familyCompleted = false;
   }
 
   int get _playableCellCount =>
@@ -125,11 +123,28 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
     setState(() {
       _playerAnswers[selectedIndex] = '';
       _answersChecked = false;
-      _familyCompleted = false;
     });
   }
 
-  void _resetPuzzle() => setState(_loadPuzzle);
+  void _mixAgain() {
+    setState(_loadPuzzle);
+  }
+
+  void _previousFamily() {
+    if (_familyIndex == 0) return;
+    setState(() {
+      _familyIndex--;
+      _loadPuzzle();
+    });
+  }
+
+  void _nextFamily() {
+    if (_familyIndex >= fidelFamilies.length - 1) return;
+    setState(() {
+      _familyIndex++;
+      _loadPuzzle();
+    });
+  }
 
   void _checkAnswers() {
     int correct = 0;
@@ -141,16 +156,56 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
       if (_playerAnswers[i] == _answers[i]) correct++;
     }
 
-    final bool completed = allFilled && correct == _playableCellCount;
-
     setState(() {
       _score = correct * 10;
       _answersChecked = true;
-      _familyCompleted = completed;
     });
 
-    if (completed) {
-      _showFamilyCompleteDialog();
+    if (allFilled && correct == _playableCellCount) {
+      final bool lastFamily = _familyIndex == fidelFamilies.length - 1;
+      showDialog<void>(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            icon: const Icon(
+              Icons.emoji_events_rounded,
+              size: 56,
+              color: Color(0xFFF4C430),
+            ),
+            title: Text(
+              lastFamily
+                  ? 'Level 3 Complete!'
+                  : '${_family.first} Family Complete!',
+              textAlign: TextAlign.center,
+            ),
+            content: Text(
+              lastFamily
+                  ? 'Excellent! You completed all ${fidelFamilies.length} mixed Fidel family crosswords.'
+                  : 'Correct. Continue to family ${_familyIndex + 2} of ${fidelFamilies.length}.',
+              textAlign: TextAlign.center,
+            ),
+            actionsAlignment: MainAxisAlignment.center,
+            actions: <Widget>[
+              if (!lastFamily)
+                FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    _nextFamily();
+                  },
+                  icon: const Icon(Icons.arrow_forward_rounded),
+                  label: const Text('Next Family'),
+                ),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                },
+                icon: const Icon(Icons.close_rounded),
+                label: const Text('Close'),
+              ),
+            ],
+          );
+        },
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -158,77 +213,6 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
         ),
       );
     }
-  }
-
-  Future<void> _showFamilyCompleteDialog() async {
-    final bool lastFamily = _familyIndex == fidelFamilies.length - 1;
-
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          icon: const Icon(
-            Icons.emoji_events_rounded,
-            size: 56,
-            color: Color(0xFFF4C430),
-          ),
-          title: Text(
-            lastFamily ? 'Level 3 Complete!' : '${_family.first} Family Complete!',
-            textAlign: TextAlign.center,
-          ),
-          content: Text(
-            lastFamily
-                ? 'Excellent! You completed all ${fidelFamilies.length} mixed Fidel family crosswords.'
-                : 'Correct. Now continue to family ${_familyIndex + 2} of ${fidelFamilies.length}.',
-            textAlign: TextAlign.center,
-          ),
-          actionsAlignment: MainAxisAlignment.center,
-          actions: <Widget>[
-            if (!lastFamily)
-              FilledButton.icon(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                  setState(() {
-                    _familyIndex++;
-                    _loadPuzzle();
-                  });
-                },
-                icon: const Icon(Icons.arrow_forward_rounded),
-                label: const Text('Next Family'),
-              )
-            else
-              FilledButton.icon(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                  setState(() {
-                    _familyIndex = 0;
-                    _loadPuzzle();
-                  });
-                },
-                icon: const Icon(Icons.replay_rounded),
-                label: const Text('Play Again'),
-              ),
-            OutlinedButton.icon(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                Navigator.of(context).pop();
-              },
-              icon: const Icon(Icons.home_rounded),
-              label: const Text('Home'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _previousFamily() {
-    if (_familyIndex == 0) return;
-    setState(() {
-      _familyIndex--;
-      _loadPuzzle();
-    });
   }
 
   Color _cellColor(int index) {
@@ -275,7 +259,7 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
         actions: <Widget>[
           IconButton(
             tooltip: 'Mix again',
-            onPressed: _resetPuzzle,
+            onPressed: _mixAgain,
             icon: const Icon(Icons.shuffle_rounded),
           ),
         ],
@@ -498,27 +482,43 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
                       ),
                       const SizedBox(width: 10),
                       Expanded(
+                        child: FilledButton.icon(
+                          onPressed: _familyIndex == fidelFamilies.length - 1
+                              ? null
+                              : _nextFamily,
+                          icon: const Icon(Icons.arrow_forward_rounded),
+                          label: const Text('Next Family'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: <Widget>[
+                      Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: _resetPuzzle,
+                          onPressed: _clearSelectedCell,
+                          icon: const Icon(Icons.backspace_rounded),
+                          label: const Text('Clear Selected'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _mixAgain,
                           icon: const Icon(Icons.shuffle_rounded),
                           label: const Text('Mix Again'),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    onPressed: _clearSelectedCell,
-                    icon: const Icon(Icons.backspace_rounded),
-                    label: const Text('Clear Selected'),
-                  ),
                   const SizedBox(height: 11),
                   FilledButton.icon(
                     onPressed: _checkAnswers,
                     icon: const Icon(Icons.check_circle_rounded),
-                    label: Text(
-                      _familyCompleted ? 'Family Complete' : 'Check Answers',
-                      style: const TextStyle(
+                    label: const Text(
+                      'Check Answers',
+                      style: TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
                       ),
