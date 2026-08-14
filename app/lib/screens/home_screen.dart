@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../app/app_routes.dart';
 import 'family_starter_challenge_screen.dart';
 import 'learn_fidel_screen.dart';
-import 'level3_red_challenge_screen.dart';
+import 'level3_mixed_crossword_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -96,7 +96,7 @@ class HomeScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute<void>(
                           builder: (BuildContext context) {
-                            return const Level3RedChallengeScreen();
+                            return const Level3MixedCrosswordScreen();
                           },
                         ),
                       );
