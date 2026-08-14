@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../screens/coming_soon_screen.dart';
 import '../screens/crossword_screen.dart';
 import '../screens/home_screen.dart';
+import '../screens/level3_family_challenge_screen.dart';
 import '../screens/levels_screen.dart';
 import '../screens/splash_screen.dart';
 import 'app_routes.dart';
@@ -28,8 +29,13 @@ class AppRouter {
           settings: settings,
         );
       case AppRoutes.crossword:
+        final Object? argument = settings.arguments;
+        final int level = argument is int ? argument : 1;
+
         return MaterialPageRoute<void>(
-          builder: (_) => const CrosswordScreen(),
+          builder: (_) => level == 3
+              ? const Level3FamilyChallengeScreen()
+              : const CrosswordScreen(),
           settings: settings,
         );
       case AppRoutes.placeholder:
