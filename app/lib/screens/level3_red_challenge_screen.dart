@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../fidel_families.dart';
@@ -11,6 +13,7 @@ class Level3RedChallengeScreen extends StatefulWidget {
 }
 
 class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
+  int _familyIndex = 0;
   late List<String> _answers;
   late List<String> _keyboard;
   late List<String> _playerAnswers;
@@ -18,6 +21,9 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
   int? _selectedIndex;
   int _score = 0;
   bool _answersChecked = false;
+  bool _familyCompleted = false;
+
+  List<String> get _family => fidelFamilies[_familyIndex];
 
   @override
   void initState() {
@@ -26,31 +32,30 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
   }
 
   void _loadPuzzle() {
-    final List<String> haFamily = fidelFamilies[0];
-    final List<String> leFamily = fidelFamilies[1];
+    final List<String> family = _family;
+    final List<String> distractorFamily =
+        fidelFamilies[(_familyIndex + 1) % fidelFamilies.length];
 
     _answers = <String>[
-      haFamily[0], haFamily[1], haFamily[2], '#', '#',
-      '#', '#', haFamily[3], '#', '#',
-      '#', '#', haFamily[4], haFamily[5], haFamily[6],
+      family[0], family[1], family[2], '#', '#',
+      '#', '#', family[3], '#', '#',
+      '#', '#', family[4], family[5], family[6],
       '#', '#', '#', '#', '#',
       '#', '#', '#', '#', '#',
     ];
 
-    final List<String> choices = <String>[
-      ...haFamily,
-      leFamily[0],
-      leFamily[1],
-      leFamily[2],
-    ];
-
-    const List<int> mixedOrder = <int>[4, 7, 1, 9, 0, 5, 8, 2, 6, 3];
-    _keyboard = mixedOrder.map((int i) => choices[i]).toList();
+    _keyboard = <String>[
+      ...family,
+      distractorFamily[0],
+      distractorFamily[1],
+      distractorFamily[2],
+    ]..shuffle(Random());
 
     _playerAnswers = List<String>.filled(_answers.length, '');
     _selectedIndex = null;
     _score = 0;
     _answersChecked = false;
+    _familyCompleted = false;
   }
 
   int get _playableCellCount =>
@@ -66,8 +71,9 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
     return count;
   }
 
-  double get _progress =>
-      _playableCellCount == 0 ? 0 : _filledCellCount / _playableCellCount;
+  double get _overallProgress =>
+      (_familyIndex + (_filledCellCount / _playableCellCount)) /
+      fidelFamilies.length;
 
   void _selectCell(int index) {
     if (_answers[index] == '#') return;
@@ -119,6 +125,7 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
     setState(() {
       _playerAnswers[selectedIndex] = '';
       _answersChecked = false;
+      _familyCompleted = false;
     });
   }
 
@@ -134,51 +141,16 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
       if (_playerAnswers[i] == _answers[i]) correct++;
     }
 
+    final bool completed = allFilled && correct == _playableCellCount;
+
     setState(() {
       _score = correct * 10;
       _answersChecked = true;
+      _familyCompleted = completed;
     });
 
-    if (allFilled && correct == _playableCellCount) {
-      showDialog<void>(
-        context: context,
-        builder: (BuildContext dialogContext) {
-          return AlertDialog(
-            icon: const Icon(
-              Icons.emoji_events_rounded,
-              size: 56,
-              color: Color(0xFFF4C430),
-            ),
-            title: const Text(
-              'Level 3 Complete!',
-              textAlign: TextAlign.center,
-            ),
-            content: Text(
-              'Excellent! You solved the mixed ሀ-family challenge and scored $_score points.',
-              textAlign: TextAlign.center,
-            ),
-            actionsAlignment: MainAxisAlignment.center,
-            actions: <Widget>[
-              FilledButton.icon(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                  _resetPuzzle();
-                },
-                icon: const Icon(Icons.shuffle_rounded),
-                label: const Text('Play Again'),
-              ),
-              OutlinedButton.icon(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop();
-                  Navigator.of(context).pop();
-                },
-                icon: const Icon(Icons.home_rounded),
-                label: const Text('Home'),
-              ),
-            ],
-          );
-        },
-      );
+    if (completed) {
+      _showFamilyCompleteDialog();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -186,6 +158,77 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
         ),
       );
     }
+  }
+
+  Future<void> _showFamilyCompleteDialog() async {
+    final bool lastFamily = _familyIndex == fidelFamilies.length - 1;
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          icon: const Icon(
+            Icons.emoji_events_rounded,
+            size: 56,
+            color: Color(0xFFF4C430),
+          ),
+          title: Text(
+            lastFamily ? 'Level 3 Complete!' : '${_family.first} Family Complete!',
+            textAlign: TextAlign.center,
+          ),
+          content: Text(
+            lastFamily
+                ? 'Excellent! You completed all ${fidelFamilies.length} mixed Fidel family crosswords.'
+                : 'Correct. Now continue to family ${_familyIndex + 2} of ${fidelFamilies.length}.',
+            textAlign: TextAlign.center,
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: <Widget>[
+            if (!lastFamily)
+              FilledButton.icon(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  setState(() {
+                    _familyIndex++;
+                    _loadPuzzle();
+                  });
+                },
+                icon: const Icon(Icons.arrow_forward_rounded),
+                label: const Text('Next Family'),
+              )
+            else
+              FilledButton.icon(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  setState(() {
+                    _familyIndex = 0;
+                    _loadPuzzle();
+                  });
+                },
+                icon: const Icon(Icons.replay_rounded),
+                label: const Text('Play Again'),
+              ),
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                Navigator.of(context).pop();
+              },
+              icon: const Icon(Icons.home_rounded),
+              label: const Text('Home'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _previousFamily() {
+    if (_familyIndex == 0) return;
+    setState(() {
+      _familyIndex--;
+      _loadPuzzle();
+    });
   }
 
   Color _cellColor(int index) {
@@ -259,11 +302,11 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
                       children: <Widget>[
                         Row(
                           children: <Widget>[
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Text(
+                                  const Text(
                                     'Level 3 — Mixed Fidel Challenge',
                                     style: TextStyle(
                                       color: Colors.white,
@@ -271,10 +314,10 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  SizedBox(height: 5),
+                                  const SizedBox(height: 5),
                                   Text(
-                                    'The ሀ-family letters are mixed with three ለ-family distractors.',
-                                    style: TextStyle(
+                                    'Family ${_familyIndex + 1} of ${fidelFamilies.length} — ${_family.first} family',
+                                    style: const TextStyle(
                                       color: Colors.white70,
                                       fontSize: 15,
                                     ),
@@ -282,13 +325,25 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
                                 ],
                               ),
                             ),
-                            Text(
-                              '$_score',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Column(
+                              children: <Widget>[
+                                const Text(
+                                  'SCORE',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  '$_score',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -296,7 +351,7 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: LinearProgressIndicator(
-                            value: _progress,
+                            value: _overallProgress,
                             minHeight: 10,
                             backgroundColor: Colors.white24,
                             valueColor: const AlwaysStoppedAnimation<Color>(
@@ -315,9 +370,9 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
                       borderRadius: BorderRadius.circular(18),
                       border: Border.all(color: const Color(0xFFF4C430)),
                     ),
-                    child: const Text(
-                      'Put ሀ ሁ ሂ ሃ ሄ ህ ሆ into the seven white crossword squares. The choices below are mixed, and three ለ-family letters are there to make you think.',
-                      style: TextStyle(
+                    child: Text(
+                      'Put ${_family.join(' ')} into the seven white squares. The choices are mixed with three letters from the next family.',
+                      style: const TextStyle(
                         color: Color(0xFF594300),
                         height: 1.4,
                         fontWeight: FontWeight.w600,
@@ -436,9 +491,9 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
                     children: <Widget>[
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: _clearSelectedCell,
-                          icon: const Icon(Icons.backspace_rounded),
-                          label: const Text('Clear'),
+                          onPressed: _familyIndex == 0 ? null : _previousFamily,
+                          icon: const Icon(Icons.arrow_back_rounded),
+                          label: const Text('Previous Family'),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -451,13 +506,22 @@ class _Level3RedChallengeScreenState extends State<Level3RedChallengeScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 10),
+                  OutlinedButton.icon(
+                    onPressed: _clearSelectedCell,
+                    icon: const Icon(Icons.backspace_rounded),
+                    label: const Text('Clear Selected'),
+                  ),
                   const SizedBox(height: 11),
                   FilledButton.icon(
                     onPressed: _checkAnswers,
                     icon: const Icon(Icons.check_circle_rounded),
-                    label: const Text(
-                      'Check Answers',
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                    label: Text(
+                      _familyCompleted ? 'Family Complete' : 'Check Answers',
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFFDA121A),
