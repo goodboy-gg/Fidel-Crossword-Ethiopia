@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../screens/challenge_crossword_screen.dart';
 import '../screens/coming_soon_screen.dart';
 import '../screens/crossword_screen.dart';
 import '../screens/home_screen.dart';
@@ -38,15 +37,9 @@ class AppRouter {
         );
 
         return MaterialPageRoute<void>(
-          builder: (_) {
-            if (level == 1) {
-              return const ChallengeCrosswordScreen(level: 1);
-            }
-            if (level == 3) {
-              return const Level3FamilyChallengeScreen();
-            }
-            return const CrosswordScreen();
-          },
+          builder: (_) => level == 3
+              ? const Level3FamilyChallengeScreen()
+              : const CrosswordScreen(),
           settings: crosswordSettings,
         );
       case AppRoutes.placeholder:
