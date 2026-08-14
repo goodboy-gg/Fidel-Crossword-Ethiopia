@@ -79,6 +79,16 @@ class _CrosswordScreenState extends State<CrosswordScreen> {
 
   void _goToFamily(int level) {
     if (level < 1 || level > _puzzles.length) return;
+
+    if (level == 3) {
+      Navigator.pushReplacementNamed(
+        context,
+        AppRoutes.crossword,
+        arguments: 3,
+      );
+      return;
+    }
+
     setState(() {
       _level = level;
       _loadPuzzle();
