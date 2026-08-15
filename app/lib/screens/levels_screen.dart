@@ -138,19 +138,25 @@ class _LevelsScreenState extends State<LevelsScreen> {
               final int level = index + 1;
               final bool unlocked = GameProgress.isLevelUnlocked(level);
               final bool selected = GameProgress.currentLevel == level;
+              final bool isChallenge = level == 3;
+
+              final Color borderColor = isChallenge
+                  ? const Color(0xFFDA121A)
+                  : selected
+                      ? const Color(0xFF078930)
+                      : Colors.grey.shade300;
 
               return InkWell(
                 borderRadius: BorderRadius.circular(18),
                 onTap: () => _openLevel(context, level),
                 child: Card(
-                  elevation: selected ? 6 : 2,
+                  color: isChallenge ? const Color(0xFFDA121A) : null,
+                  elevation: selected || isChallenge ? 6 : 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
                     side: BorderSide(
-                      width: selected ? 3 : 1,
-                      color: selected
-                          ? const Color(0xFF078930)
-                          : Colors.grey.shade300,
+                      width: selected || isChallenge ? 3 : 1,
+                      color: borderColor,
                     ),
                   ),
                   child: Padding(
@@ -159,38 +165,59 @@ class _LevelsScreenState extends State<LevelsScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          unlocked
-                              ? Icons.lock_open_rounded
-                              : Icons.lock_rounded,
-                          size: 34,
-                          color: unlocked
-                              ? const Color(0xFF078930)
-                              : Colors.grey,
+                          isChallenge
+                              ? Icons.extension_rounded
+                              : unlocked
+                                  ? Icons.lock_open_rounded
+                                  : Icons.lock_rounded,
+                          size: 38,
+                          color: isChallenge
+                              ? Colors.white
+                              : unlocked
+                                  ? const Color(0xFF078930)
+                                  : Colors.grey,
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          'Level $level — ${fidelFamilyName(level)}',
+                          isChallenge
+                              ? 'Level 3 — Challenge'
+                              : 'Level $level — ${fidelFamilyName(level)}',
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
                               ?.copyWith(
                                 fontWeight: FontWeight.bold,
+                                color: isChallenge ? Colors.white : null,
                               ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          unlocked
-                              ? '${fidelFamilies[level - 1].first} to ${fidelFamilies[level - 1].last}'
-                              : 'Locked',
+                          isChallenge
+                              ? 'Mixed-family crossword'
+                              : unlocked
+                                  ? '${fidelFamilies[level - 1].first} to ${fidelFamilies[level - 1].last}'
+                                  : 'Locked',
                           style: TextStyle(
-                            color: unlocked
-                                ? const Color(0xFF078930)
-                                : Colors.grey,
+                            color: isChallenge
+                                ? Colors.white
+                                : unlocked
+                                    ? const Color(0xFF078930)
+                                    : Colors.grey,
                             fontWeight: FontWeight.w600,
                           ),
                           textAlign: TextAlign.center,
                         ),
+                        if (isChallenge) ...[
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Tap to play',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
