@@ -4,6 +4,7 @@ import '../app/app_routes.dart';
 import 'about_screen.dart';
 import 'family_starter_challenge_screen.dart';
 import 'learn_fidel_screen.dart';
+import 'level3_red_challenge_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -68,6 +69,24 @@ class HomeScreen extends StatelessWidget {
                     foregroundColor: Colors.white,
                     onPressed: () {
                       Navigator.pushNamed(context, AppRoutes.levels);
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  _MenuButton(
+                    icon: Icons.grid_view_rounded,
+                    title: 'Level 3 — Challenge',
+                    subtitle: '33 mixed family crosswords',
+                    backgroundColor: ethiopianRed,
+                    foregroundColor: Colors.white,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) {
+                            return const Level3RedChallengeScreen();
+                          },
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 14),
