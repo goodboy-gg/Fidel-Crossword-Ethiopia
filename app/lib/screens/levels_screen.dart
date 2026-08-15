@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../game_progress.dart';
 import '../fidel_families.dart';
-import 'challenge_crossword_screen.dart';
 import 'crossword_screen.dart';
+import 'level3_family_challenge_screen.dart';
 
 class LevelsScreen extends StatefulWidget {
   const LevelsScreen({super.key});
@@ -51,7 +51,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
       Navigator.push(
         context,
         MaterialPageRoute<void>(
-          builder: (_) => const ChallengeCrosswordScreen(level: 3),
+          builder: (_) => const Level3FamilyChallengeScreen(),
         ),
       ).then((_) {
         if (mounted) {
@@ -194,7 +194,7 @@ class _LevelsScreenState extends State<LevelsScreen> {
                         const SizedBox(height: 6),
                         Text(
                           isChallenge
-                              ? 'Mixed-family crossword'
+                              ? 'All Fidel families — mixed 1–7 order'
                               : unlocked
                                   ? '${fidelFamilies[level - 1].first} to ${fidelFamilies[level - 1].last}'
                                   : 'Locked',
