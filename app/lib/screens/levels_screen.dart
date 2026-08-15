@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../game_progress.dart';
 import '../fidel_families.dart';
-import 'challenge_crossword_screen.dart';
+import 'crossword_screen.dart';
 
 class LevelsScreen extends StatefulWidget {
   const LevelsScreen({super.key});
@@ -49,7 +49,8 @@ class _LevelsScreenState extends State<LevelsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute<void>(
-        builder: (_) => ChallengeCrosswordScreen(level: level),
+        builder: (_) => const CrosswordScreen(),
+        settings: RouteSettings(arguments: level),
       ),
     ).then((_) {
       if (mounted) {
