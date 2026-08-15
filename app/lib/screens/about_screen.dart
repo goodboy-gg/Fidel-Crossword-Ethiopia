@@ -44,7 +44,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Learn • Play • Celebrate Ethiopian Fidel',
+                    'An easy, quick and enjoyable way to start learning the Ethiopian Fidel alphabet and the Amharic language — learn the letters, hear the sounds, and practice through play.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
