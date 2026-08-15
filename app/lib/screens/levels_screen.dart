@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../game_progress.dart';
 import '../fidel_families.dart';
+import 'challenge_crossword_screen.dart';
 import 'crossword_screen.dart';
 
 class LevelsScreen extends StatefulWidget {
@@ -45,6 +46,20 @@ class _LevelsScreenState extends State<LevelsScreen> {
     }
 
     GameProgress.selectLevel(level);
+
+    if (level == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute<void>(
+          builder: (_) => const ChallengeCrosswordScreen(level: 3),
+        ),
+      ).then((_) {
+        if (mounted) {
+          setState(() {});
+        }
+      });
+      return;
+    }
 
     Navigator.push(
       context,
