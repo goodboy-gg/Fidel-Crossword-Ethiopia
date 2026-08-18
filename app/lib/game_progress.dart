@@ -1,12 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'fidel_families.dart';
-
 class GameProgress {
 
   GameProgress._();
 
-  static const int totalLevels = totalFidelFamilies;
+  static const int totalLevels = 33;
 
   static const String _highestUnlockedKey =
 

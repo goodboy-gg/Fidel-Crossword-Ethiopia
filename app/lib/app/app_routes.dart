@@ -10,6 +10,10 @@ class AppRoutes {
 
   static const String crossword = '/crossword';
 
+  static const String settings = '/settings';
+
+  static const String about = '/about';
+
   static const String placeholder = '/placeholder';
 
 }
