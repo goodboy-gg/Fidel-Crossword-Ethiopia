@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../app/app_routes.dart';
 import 'about_screen.dart';
+import 'beginner_fidel_practice_screen.dart';
 import 'family_starter_challenge_screen.dart';
 import 'learn_fidel_screen.dart';
 import 'level3_red_challenge_screen.dart';
+import 'levels_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -29,62 +30,67 @@ class HomeScreen extends StatelessWidget {
                   const _HomeHeader(),
                   const SizedBox(height: 30),
                   _MenuButton(
-                    icon: Icons.play_arrow_rounded,
-                    title: 'Start Game',
-                    subtitle: 'Begin a new Fidel crossword',
+                    icon: Icons.school_rounded,
+                    title: 'Begin Learning Fidel',
+                    subtitle: 'Step 1: See, copy and place all 231 letters',
                     backgroundColor: ethiopianGreen,
                     foregroundColor: Colors.white,
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        AppRoutes.crossword,
-                        arguments: 1,
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 14),
-                  _MenuButton(
-                    icon: Icons.menu_book_rounded,
-                    title: 'Learn Fidel',
-                    subtitle: 'Study Ethiopian letters and sounds',
-                    backgroundColor: ethiopianGold,
-                    foregroundColor: Colors.black87,
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
-                            return const LearnFidelScreen();
-                          },
+                          builder: (BuildContext context) =>
+                              const BeginnerFidelPracticeScreen(),
                         ),
                       );
                     },
                   ),
                   const SizedBox(height: 14),
                   _MenuButton(
-                    icon: Icons.emoji_events_rounded,
-                    title: 'Levels',
-                    subtitle: 'Choose your challenge',
-                    backgroundColor: ethiopianRed,
-                    foregroundColor: Colors.white,
+                    icon: Icons.volume_up_rounded,
+                    title: 'Learn Fidel Sounds',
+                    subtitle: 'Step 2: Hear and practise each Fidel sound',
+                    backgroundColor: ethiopianGold,
+                    foregroundColor: Colors.black87,
                     onPressed: () {
-                      Navigator.pushNamed(context, AppRoutes.levels);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) =>
+                              const LearnFidelScreen(),
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 14),
                   _MenuButton(
                     icon: Icons.grid_view_rounded,
-                    title: 'Level 3 — Challenge',
-                    subtitle: '33 mixed family crosswords',
+                    title: 'Easy Fidel Crosswords',
+                    subtitle: 'Step 3: Choose a family and practise',
                     backgroundColor: ethiopianRed,
                     foregroundColor: Colors.white,
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
-                            return const Level3RedChallengeScreen();
-                          },
+                          builder: (BuildContext context) => const LevelsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 14),
+                  _MenuButton(
+                    icon: Icons.shuffle_rounded,
+                    title: 'Mixed Fidel Challenge',
+                    subtitle: 'Step 4: Practise the mixed Fidel crossword',
+                    backgroundColor: const Color(0xFF9D0B11),
+                    foregroundColor: Colors.white,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (BuildContext context) =>
+                              const Level3RedChallengeScreen(),
                         ),
                       );
                     },
@@ -93,16 +99,15 @@ class HomeScreen extends StatelessWidget {
                   _MenuButton(
                     icon: Icons.extension_rounded,
                     title: 'Challenge Yourself',
-                    subtitle: 'Put all 33 Fidel families in order',
+                    subtitle: 'Final challenge: Put all 33 Fidel families in order',
                     backgroundColor: const Color(0xFF6A1B9A),
                     foregroundColor: Colors.white,
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
-                            return const FamilyStarterChallengeScreen();
-                          },
+                          builder: (BuildContext context) =>
+                              const FamilyStarterChallengeScreen(),
                         ),
                       );
                     },
@@ -118,9 +123,8 @@ class HomeScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
-                            return const SettingsScreen();
-                          },
+                          builder: (BuildContext context) =>
+                              const SettingsScreen(),
                         ),
                       );
                     },
@@ -137,21 +141,19 @@ class HomeScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute<void>(
-                          builder: (BuildContext context) {
-                            return const AboutScreen();
-                          },
+                          builder: (BuildContext context) => const AboutScreen(),
                         ),
                       );
                     },
                   ),
                   const SizedBox(height: 28),
                   const Text(
-                    'Learn • Play • Celebrate Ethiopian Fidel',
+                    'See • Hear • Practice • Mix • Master',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFF546E7A),
                       fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -202,7 +204,7 @@ class _HomeHeader extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         const Text(
-          'Discover Ethiopian Fidel through learning and play.',
+          'Start from the beginning and grow into a Fidel master.',
           textAlign: TextAlign.center,
           style: TextStyle(color: Color(0xFF607D8B), fontSize: 16),
         ),
