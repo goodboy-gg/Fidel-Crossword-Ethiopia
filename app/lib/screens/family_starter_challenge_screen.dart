@@ -1,4 +1,8 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+
+import '../app/app_settings.dart';
+import '../fidel_families.dart';
 
 class FamilyStarterChallengeScreen extends StatefulWidget {
   const FamilyStarterChallengeScreen({super.key});
@@ -10,18 +14,14 @@ class FamilyStarterChallengeScreen extends StatefulWidget {
 
 class _FamilyStarterChallengeScreenState
     extends State<FamilyStarterChallengeScreen> {
-  static const List<String> _answers = <String>[
-    'ሀ', 'ለ', 'ሐ', 'መ', 'ሠ', 'ረ', 'ሰ', 'ቀ', 'በ', 'ተ', 'ቸ',
-    'ኀ', 'ነ', 'ኘ', 'አ', 'ከ', 'ኸ', 'ወ', 'ዐ', 'ዘ', 'ዠ', 'የ', 'ደ',
-    'ጀ', 'ገ', 'ጠ', 'ጨ', 'ጰ', 'ጸ', 'ፀ', 'ፈ', 'ፐ', 'ቨ',
+  static const List<int> _mixedOrder = <int>[
+    22, 4, 11, 32, 13, 0, 27, 19, 8, 31, 24,
+    5, 17, 21, 3, 30, 9, 15, 28, 2, 23, 14,
+    6, 26, 1, 29, 20, 12, 25, 10, 16, 18, 7,
   ];
 
-  static const List<String> _mixedLetters = <String>[
-    'የ', 'ሠ', 'ቸ', 'ፐ', 'ነ', 'ሀ', 'ጨ', 'ዐ', 'ቀ', 'ፈ', 'ጀ', 'ረ',
-    'ኸ', 'ዠ', 'መ', 'ፀ', 'በ', 'አ', 'ጰ', 'ሐ', 'ደ', 'ኘ', 'ቨ',
-    'ሰ', 'ጠ', 'ለ', 'ጸ', 'ዘ', 'ኀ', 'ገ', 'ተ', 'ከ', 'ወ',
-  ];
-
+  late final List<String> _answers;
+  late final List<String> _mixedLetters;
   late List<String> _playerAnswers;
   int? _selectedIndex;
   bool _answersChecked = false;
@@ -30,6 +30,8 @@ class _FamilyStarterChallengeScreenState
   @override
   void initState() {
     super.initState();
+    _answers = fidelFamilies.map((List<String> family) => family.first).toList();
+    _mixedLetters = _mixedOrder.map((int i) => _answers[i]).toList();
     _reset();
   }
 
@@ -68,7 +70,7 @@ class _FamilyStarterChallengeScreenState
     });
   }
 
-  void _checkAnswers() {
+  Future<void> _checkAnswers() async {
     int correct = 0;
     for (int i = 0; i < _answers.length; i++) {
       if (_playerAnswers[i] == _answers[i]) correct++;
@@ -79,35 +81,52 @@ class _FamilyStarterChallengeScreenState
       _score = correct * 10;
     });
 
-    if (correct == _answers.length) {
-      showDialog<void>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          icon: const Icon(Icons.emoji_events_rounded,
-              size: 58, color: Color(0xFFF4C430)),
-          title: const Text('Level 4 Complete!', textAlign: TextAlign.center),
-          content: Text(
-            'Excellent! You placed all 33 Fidel families correctly and scored $_score points.',
-            textAlign: TextAlign.center,
-          ),
-          actionsAlignment: MainAxisAlignment.center,
-          actions: <Widget>[
-            FilledButton.icon(
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(_reset);
-              },
-              icon: const Icon(Icons.replay_rounded),
-              label: const Text('Play Again'),
-            ),
-          ],
-        ),
-      );
-    } else {
+    if (correct != _answers.length) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$correct of 33 letters are correct.')),
+        SnackBar(content: Text('$correct of ${_answers.length} letters are correct.')),
       );
+      return;
     }
+
+    if (AppSettings.soundEnabled.value) {
+      final AudioPlayer player = AudioPlayer();
+      try {
+        await player.play(AssetSource('sounds/level_complete.wav'));
+      } catch (_) {
+        // Completion still works if sound cannot be played.
+      } finally {
+        await player.dispose();
+      }
+    }
+
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        icon: const Icon(
+          Icons.emoji_events_rounded,
+          size: 58,
+          color: Color(0xFFF4C430),
+        ),
+        title: const Text('Challenge Complete!', textAlign: TextAlign.center),
+        content: Text(
+          'Excellent! You placed all ${_answers.length} Fidel families correctly and scored $_score points.',
+          textAlign: TextAlign.center,
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actions: <Widget>[
+          FilledButton.icon(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              setState(_reset);
+            },
+            icon: const Icon(Icons.replay_rounded),
+            label: const Text('Play Again'),
+          ),
+        ],
+      ),
+    );
   }
 
   Color _cellColor(int index) {
@@ -149,7 +168,7 @@ class _FamilyStarterChallengeScreenState
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: const Text(
-                      'Put the 33 mixed Fidel family letters back into their correct numbered order.',
+                      'Put the 33 mixed Fidel family starters back into their correct numbered order.',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
@@ -159,8 +178,7 @@ class _FamilyStarterChallengeScreenState
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: _answers.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 6,
                       crossAxisSpacing: 6,
                       mainAxisSpacing: 6,

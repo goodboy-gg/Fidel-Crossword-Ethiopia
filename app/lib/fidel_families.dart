@@ -1,4 +1,4 @@
-/// The 33 Ethiopian Fidel families used by the game.
+/// The 33 Ethiopian Fidel families used by the game, in learning order.
 const List<List<String>> fidelFamilies = <List<String>>[
   <String>['ሀ', 'ሁ', 'ሂ', 'ሃ', 'ሄ', 'ህ', 'ሆ'],
   <String>['ለ', 'ሉ', 'ሊ', 'ላ', 'ሌ', 'ል', 'ሎ'],

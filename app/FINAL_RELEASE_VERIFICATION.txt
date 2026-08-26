@@ -1,0 +1,19 @@
+Fidel Crossword Ethiopia — Final Release Source Verification
+Version: 1.0.0+1
+
+Prepared from the untouched Release 1.0.0 source package.
+
+Verified in this package:
+- All 33 Fidel family crosswords are retained exactly once.
+- Level 3 is the separate Mixed Family Challenge using 7 family starters:
+  ሀ ለ ሐ መ ሠ ረ ሰ
+- The normal ሐ family crossword is retained after the Level 3 challenge.
+- Purple Challenge Yourself remains separate.
+- Audio asset files are byte-for-byte unchanged from the original Release 1.0.0 package.
+- Android, iOS and web project folders are present.
+- pubspec.yaml still includes assets/sounds/.
+
+Important final build step:
+A Flutter SDK is not available inside the packaging environment used to create this archive,
+so run `flutter analyze` and the normal device/build check in the existing Codespace before
+submitting the binary to Apple/Google. No source or audio changes are required for that check.

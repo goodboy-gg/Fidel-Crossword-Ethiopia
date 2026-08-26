@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
+import '../app/app_settings.dart';
 import '../fidel_families.dart';
 
 class LearnFidelScreen extends StatefulWidget {
@@ -20,11 +21,30 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
   List<String> get _selectedFamily => fidelFamilies[_selectedFamilyIndex];
 
   String _audioFileForLetter(String letter) {
-    final String unicode = letter.runes.first.toRadixString(16).toLowerCase();
-    return 'sounds/fidel_$unicode.m4a';
+    final int code = letter.runes.first;
+    final String unicode = code.toRadixString(16).toLowerCase();
+
+    // These families have later verified replacement recordings.
+    final bool usesWavFix =
+        (code >= 0x1238 && code <= 0x123e) || // ሸ family
+        (code >= 0x12f0 && code <= 0x12f6) || // ደ family
+        (code >= 0x1300 && code <= 0x1306) || // ጀ family
+        (code >= 0x1338 && code <= 0x133e); // ጸ family
+
+    return 'sounds/fidel_$unicode.${usesWavFix ? 'wav' : 'm4a'}';
   }
 
   Future<void> _playLetter(String letter) async {
+    if (!AppSettings.soundEnabled.value) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('Sound is turned off in Settings.')),
+        );
+      return;
+    }
+
     setState(() {
       _selectedLetter = letter;
       _isPlaying = true;
@@ -39,7 +59,7 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text('The sound for $letter is not available yet.'),
+            content: Text('The sound for $letter could not be played.'),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -52,26 +72,27 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
     }
   }
 
-  void _selectPreviousFamily() {
+  void _selectFamily(int index) {
     setState(() {
-      if (_selectedFamilyIndex == 0) {
-        _selectedFamilyIndex = fidelFamilies.length - 1;
-      } else {
-        _selectedFamilyIndex--;
-      }
+      _selectedFamilyIndex = index;
       _selectedLetter = null;
     });
   }
 
+  void _selectPreviousFamily() {
+    _selectFamily(
+      _selectedFamilyIndex == 0
+          ? fidelFamilies.length - 1
+          : _selectedFamilyIndex - 1,
+    );
+  }
+
   void _selectNextFamily() {
-    setState(() {
-      if (_selectedFamilyIndex == fidelFamilies.length - 1) {
-        _selectedFamilyIndex = 0;
-      } else {
-        _selectedFamilyIndex++;
-      }
-      _selectedLetter = null;
-    });
+    _selectFamily(
+      _selectedFamilyIndex == fidelFamilies.length - 1
+          ? 0
+          : _selectedFamilyIndex + 1,
+    );
   }
 
   @override
@@ -181,7 +202,7 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                 fontSize: 58,
-                                height: 1.0,
+                                height: 1,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black87,
                               ),
@@ -208,20 +229,13 @@ class _LearnFidelScreenState extends State<LearnFidelScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 scrollDirection: Axis.horizontal,
                 itemCount: fidelFamilies.length,
-                separatorBuilder: (BuildContext context, int index) =>
-                    const SizedBox(width: 8),
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (BuildContext context, int index) {
                   final bool isSelected = index == _selectedFamilyIndex;
-
                   return ChoiceChip(
                     selected: isSelected,
                     label: Text('${index + 1}. ${fidelFamilies[index].first}'),
-                    onSelected: (_) {
-                      setState(() {
-                        _selectedFamilyIndex = index;
-                        _selectedLetter = null;
-                      });
-                    },
+                    onSelected: (_) => _selectFamily(index),
                   );
                 },
               ),
