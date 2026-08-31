@@ -1,0 +1,21 @@
+Fidel Crossword Ethiopia — Final Check Build
+
+Included for the last review:
+1. Updated Begin Learning Fidel / Step 1
+   - Four compact ordered Fidel guide panels covering all 33 families / 231 letters.
+   - The guide letters are tappable.
+   - Box 1 starts selected; after placing a letter, the next empty numbered box is selected automatically.
+   - Compact 231-box grid: 21 columns on wide screens, 14 on medium screens, 7 on small screens.
+   - No shuffled beginner letter bank.
+   - Shorter, clearer beginner instructions.
+
+2. Confirmed audio corrections only
+   - ሀ family is preserved and NOT changed.
+   - ለ ሉ ሊ ላ ሌ ል ሎ replaced with the corrected ለ-family clips.
+   - ኀ now uses the same correct sound as ሀ.
+   - ጰ uses the newly supplied correct recording.
+
+Everything else from the reviewed Learning Journey Complete project is preserved.
+FINAL AUDIO CORRECTION v2:
+- ጰ ጱ ጲ ጳ ጴ ጵ ጶ rebuilt from the verified ጰ-family source recording.
+- ጸ family left unchanged.

@@ -1,0 +1,14 @@
+FIDEL CROSSWORD ETHIOPIA — RESTORED MIXED CROSSWORD TEST COPY v4
+
+Purpose of this test copy:
+- Preserve the approved v3 project exactly.
+- Keep the approved 33-Family Mixed Learning activity unchanged.
+- Restore the original Mixed Family Challenge crossword as a separate activity.
+
+Restored crossword content:
+Correct answer order: ሀ, ለ, ሐ, መ, ሠ, ረ, ሰ
+Mixed choices: ረ, ሀ, ሠ, ለ, ሰ, መ, ሐ, ሉ, ሁ, ሑ
+Includes numbered crossword boxes, score, progress, clear/reset, check answers, and completion dialog.
+
+This v4 intentionally does NOT change the known remaining ኀ audio issue.
+That audio correction should be applied only after the restored crossword is approved.

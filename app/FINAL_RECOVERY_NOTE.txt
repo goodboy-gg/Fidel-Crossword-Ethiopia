@@ -1,0 +1,17 @@
+FIDEL CROSSWORD ETHIOPIA — FINAL RELEASE CANDIDATE v3
+
+Recovery change only:
+- Restored the full Mixed Fidel Challenge as the approved 33-family activity.
+- Families appear in the approved order from ሀ through ፐ.
+- Each family shows 7 answer boxes and its 7 Fidel letters mixed underneath.
+- The learner taps the mixed letters to rebuild each family in correct 1–7 order.
+
+Protected from v2 (not changed during this recovery):
+- Begin Learning Fidel
+- Learn Fidel Sounds and existing audio assets
+- Easy Fidel Crosswords
+- Challenge Yourself (purple 33-family starter challenge)
+- Settings / About / other app files
+
+Only home_screen.dart and mixed_level3_challenge_screen.dart were changed from v2,
+plus this recovery note was added.

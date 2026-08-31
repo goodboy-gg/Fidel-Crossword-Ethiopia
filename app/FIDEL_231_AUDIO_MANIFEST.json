@@ -52,50 +52,50 @@
     "family": "ለ",
     "letter": "ለ",
     "file": "fidel_1208.m4a",
-    "start_ms": 323,
-    "end_ms": 955
+    "start_ms": 0,
+    "end_ms": 753
   },
   {
     "family": "ለ",
     "letter": "ሉ",
     "file": "fidel_1209.m4a",
-    "start_ms": 1339,
-    "end_ms": 1972
+    "start_ms": 0,
+    "end_ms": 813
   },
   {
     "family": "ለ",
     "letter": "ሊ",
     "file": "fidel_120a.m4a",
-    "start_ms": 2350,
-    "end_ms": 2972
+    "start_ms": 0,
+    "end_ms": 727
   },
   {
     "family": "ለ",
     "letter": "ላ",
     "file": "fidel_120b.m4a",
-    "start_ms": 3346,
-    "end_ms": 3951
+    "start_ms": 0,
+    "end_ms": 702
   },
   {
     "family": "ለ",
     "letter": "ሌ",
     "file": "fidel_120c.m4a",
-    "start_ms": 4387,
-    "end_ms": 4966
+    "start_ms": 0,
+    "end_ms": 735
   },
   {
     "family": "ለ",
     "letter": "ል",
     "file": "fidel_120d.m4a",
-    "start_ms": 5386,
-    "end_ms": 5946
+    "start_ms": 0,
+    "end_ms": 665
   },
   {
     "family": "ለ",
     "letter": "ሎ",
     "file": "fidel_120e.m4a",
-    "start_ms": 6356,
-    "end_ms": 6750
+    "start_ms": 0,
+    "end_ms": 515
   },
   {
     "family": "ሐ",
@@ -591,8 +591,8 @@
     "family": "ኀ",
     "letter": "ኀ",
     "file": "fidel_1280.m4a",
-    "start_ms": 327,
-    "end_ms": 660
+    "start_ms": 0,
+    "end_ms": 632
   },
   {
     "family": "ኀ",
@@ -1375,50 +1375,50 @@
     "family": "ጰ",
     "letter": "ጰ",
     "file": "fidel_1330.m4a",
-    "start_ms": 562,
-    "end_ms": 1318
+    "start_ms": 239,
+    "end_ms": 925
   },
   {
     "family": "ጰ",
     "letter": "ጱ",
     "file": "fidel_1331.m4a",
-    "start_ms": 1887,
-    "end_ms": 2589
+    "start_ms": 1386,
+    "end_ms": 2119
   },
   {
     "family": "ጰ",
     "letter": "ጲ",
     "file": "fidel_1332.m4a",
-    "start_ms": 3083,
-    "end_ms": 3767
+    "start_ms": 2632,
+    "end_ms": 3337
   },
   {
     "family": "ጰ",
     "letter": "ጳ",
     "file": "fidel_1333.m4a",
-    "start_ms": 4348,
-    "end_ms": 5013
+    "start_ms": 3712,
+    "end_ms": 4431
   },
   {
     "family": "ጰ",
     "letter": "ጴ",
     "file": "fidel_1334.m4a",
-    "start_ms": 5656,
-    "end_ms": 6350
+    "start_ms": 4885,
+    "end_ms": 5602
   },
   {
     "family": "ጰ",
     "letter": "ጵ",
     "file": "fidel_1335.m4a",
-    "start_ms": 6895,
-    "end_ms": 7613
+    "start_ms": 6117,
+    "end_ms": 6784
   },
   {
     "family": "ጰ",
     "letter": "ጶ",
     "file": "fidel_1336.m4a",
-    "start_ms": 8165,
-    "end_ms": 8721
+    "start_ms": 7236,
+    "end_ms": 7833
   },
   {
     "family": "ጸ",

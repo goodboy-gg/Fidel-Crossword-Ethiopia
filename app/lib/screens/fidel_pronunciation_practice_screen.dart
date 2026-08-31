@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 
+import '../app/app_settings.dart';
 import '../fidel_families.dart';
 
 class FidelPronunciationPracticeScreen extends StatefulWidget {
@@ -11,10 +12,22 @@ class FidelPronunciationPracticeScreen extends StatefulWidget {
       _FidelPronunciationPracticeScreenState();
 }
 
+class _LetterPronunciation {
+  const _LetterPronunciation({
+    required this.familyNumber,
+    required this.order,
+    required this.letter,
+    required this.english,
+  });
+
+  final int familyNumber;
+  final int order;
+  final String letter;
+  final String english;
+}
+
 class _FidelPronunciationPracticeScreenState
     extends State<FidelPronunciationPracticeScreen> {
-  // Plain-English sound hints. The saved audio recording is the authority
-  // for the exact pronunciation; these labels are an easy reading guide.
   static const List<List<String>> _englishPronunciations = <List<String>>[
     <String>['Huh', 'Hoo', 'Hee', 'Hah', 'Heh', 'Hih', 'Hoh'],
     <String>['Luh', 'Loo', 'Lee', 'Lah', 'Leh', 'Lih', 'Loh'],
@@ -52,53 +65,80 @@ class _FidelPronunciationPracticeScreenState
   ];
 
   final AudioPlayer _audioPlayer = AudioPlayer();
-  late List<String> _placedLetters;
+  late final List<_LetterPronunciation> _letters;
 
   @override
   void initState() {
     super.initState();
-    _reset();
+    _letters = _buildLetters();
   }
 
-  void _reset() {
-    _placedLetters = List<String>.filled(totalFidelFamilies * 7, '');
+  List<_LetterPronunciation> _buildLetters() {
+    final List<_LetterPronunciation> entries = <_LetterPronunciation>[];
+
+    for (
+      int familyIndex = 0;
+      familyIndex < fidelFamilies.length;
+      familyIndex++
+    ) {
+      final List<String> family = fidelFamilies[familyIndex];
+      for (int orderIndex = 0; orderIndex < family.length; orderIndex++) {
+        entries.add(
+          _LetterPronunciation(
+            familyNumber: familyIndex + 1,
+            order: orderIndex + 1,
+            letter: family[orderIndex],
+            english: _englishPronunciations[familyIndex][orderIndex],
+          ),
+        );
+      }
+    }
+
+    return entries;
   }
 
   String _audioFileForLetter(String letter) {
     final int code = letter.runes.first;
-    final String hex = code.toRadixString(16).toLowerCase();
+    final String unicode = code.toRadixString(16).toLowerCase();
+
     final bool usesWavFix =
         (code >= 0x1238 && code <= 0x123e) ||
         (code >= 0x12f0 && code <= 0x12f6) ||
         (code >= 0x1300 && code <= 0x1306) ||
         (code >= 0x1338 && code <= 0x133e);
-    return 'sounds/fidel_$hex.${usesWavFix ? 'wav' : 'm4a'}';
+
+    return 'sounds/fidel_$unicode.${usesWavFix ? 'wav' : 'm4a'}';
   }
 
   Future<void> _playLetter(String letter) async {
+    if (!AppSettings.soundEnabled.value) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('Sound is turned off in Settings.')),
+        );
+      return;
+    }
+
     try {
       await _audioPlayer.stop();
       await _audioPlayer.play(AssetSource(_audioFileForLetter(letter)));
     } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Audio is not available for this letter.')),
-      );
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text('The sound for $letter could not be played.'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
     }
-  }
-
-  String _englishLabel(int familyIndex, int orderIndex) {
-    return _englishPronunciations[familyIndex][orderIndex];
-  }
-
-  Future<void> _placeLetter(int familyIndex, int orderIndex) async {
-    final int expectedIndex = familyIndex * 7 + orderIndex;
-    final String letter = fidelFamilies[familyIndex][orderIndex];
-
-    setState(() {
-      _placedLetters[expectedIndex] = letter;
-    });
-    await _playLetter(letter);
   }
 
   @override
@@ -109,11 +149,8 @@ class _FidelPronunciationPracticeScreenState
 
   @override
   Widget build(BuildContext context) {
-    final int completed =
-        _placedLetters.where((String letter) => letter.isNotEmpty).length;
-
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F5FC),
+      backgroundColor: const Color(0xFFF5EEFF),
       appBar: AppBar(
         backgroundColor: const Color(0xFF6A1B9A),
         foregroundColor: Colors.white,
@@ -128,194 +165,115 @@ class _FidelPronunciationPracticeScreenState
           padding: const EdgeInsets.all(16),
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 920),
+              constraints: const BoxConstraints(maxWidth: 980),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF0E5F7),
+                      color: const Color(0xFFF0E5FF),
                       borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: const Color(0xFFC5A3D9)),
+                      border: Border.all(color: const Color(0xFFCFB8ED)),
                     ),
                     child: const Text(
-                      'Read the English sound guide, then tap the matching Fidel '
-                      'letter. Your original recording plays immediately after '
-                      'placement, so you can hear the exact pronunciation. Every '
-                      'family stays in learning order.',
+                      'Tap each Fidel letter to hear the original pronunciation recording. The family order stays exactly 1–7 across all 33 families.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
                         height: 1.4,
                         fontWeight: FontWeight.w600,
+                        color: Color(0xFF2E1A47),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(
-                          '$completed of ${totalFidelFamilies * 7} placed',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      OutlinedButton.icon(
-                        onPressed: () => setState(_reset),
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('Reset'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  ...List<Widget>.generate(
-                    fidelFamilies.length,
-                    (int familyIndex) => _FamilyPracticeCard(
-                      familyNumber: familyIndex + 1,
-                      letters: fidelFamilies[familyIndex],
-                      labels: List<String>.generate(
-                        7,
-                        (int orderIndex) =>
-                            _englishLabel(familyIndex, orderIndex),
-                      ),
-                      placedLetters: _placedLetters.sublist(
-                        familyIndex * 7,
-                        familyIndex * 7 + 7,
-                      ),
-                      onPlaceLetter: (int orderIndex) =>
-                          _placeLetter(familyIndex, orderIndex),
-                      onPlayLetter: (int orderIndex) =>
-                          _playLetter(fidelFamilies[familyIndex][orderIndex]),
-                    ),
+                  const SizedBox(height: 16),
+                  LayoutBuilder(
+                    builder:
+                        (BuildContext context, BoxConstraints constraints) {
+                          final int crossAxisCount = constraints.maxWidth >= 900
+                              ? 7
+                              : constraints.maxWidth >= 620
+                              ? 5
+                              : 3;
+
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _letters.length,
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  mainAxisSpacing: 12,
+                                  crossAxisSpacing: 12,
+                                  childAspectRatio: 0.9,
+                                ),
+                            itemBuilder: (BuildContext context, int index) {
+                              final _LetterPronunciation item = _letters[index];
+
+                              return InkWell(
+                                borderRadius: BorderRadius.circular(18),
+                                onTap: () => _playLetter(item.letter),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(18),
+                                    border: Border.all(
+                                      color: const Color(0xFFE0D3F7),
+                                    ),
+                                    boxShadow: const <BoxShadow>[
+                                      BoxShadow(
+                                        color: Color(0x1A6A1B9A),
+                                        blurRadius: 10,
+                                        offset: Offset(0, 6),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(
+                                        'F${item.familyNumber}.${item.order}',
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF6A1B9A),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        item.letter,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontSize: 42,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF1E1E1E),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        item.english,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: Color(0xFF4A3D5A),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
                   ),
                 ],
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _FamilyPracticeCard extends StatelessWidget {
-  const _FamilyPracticeCard({
-    required this.familyNumber,
-    required this.letters,
-    required this.labels,
-    required this.placedLetters,
-    required this.onPlaceLetter,
-    required this.onPlayLetter,
-  });
-
-  final int familyNumber;
-  final List<String> letters;
-  final List<String> labels;
-  final List<String> placedLetters;
-  final ValueChanged<int> onPlaceLetter;
-  final ValueChanged<int> onPlayLetter;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE0D4E8)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            'Family $familyNumber — ${letters.first}',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 9),
-          Row(
-            children: List<Widget>.generate(7, (int index) {
-              final bool complete = placedLetters[index].isNotEmpty;
-              return Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: Container(
-                    height: 76,
-                    decoration: BoxDecoration(
-                      color: complete
-                          ? const Color(0xFFD8F3DC)
-                          : const Color(0xFFF9F7FB),
-                      borderRadius: BorderRadius.circular(9),
-                      border: Border.all(
-                        color: const Color(0xFFC8BDD0),
-                        width: 1,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          labels[index],
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          placedLetters[index],
-                          style: const TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF075A32),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: List<Widget>.generate(7, (int index) {
-              final bool used = placedLetters[index].isNotEmpty;
-              return Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: SizedBox(
-                    height: 49,
-                    child: FilledButton(
-                      onPressed: used ? () => onPlayLetter(index) : () => onPlaceLetter(index),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: used
-                            ? const Color(0xFFE8F5E9)
-                            : const Color(0xFF6A1B9A),
-                        foregroundColor:
-                            used ? const Color(0xFF075A32) : Colors.white,
-                        padding: EdgeInsets.zero,
-                      ),
-                      child: used
-                          ? const Icon(Icons.volume_up_rounded, size: 20)
-                          : Text(
-                              letters[index],
-                              style: const TextStyle(
-                                fontSize: 21,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-        ],
       ),
     );
   }

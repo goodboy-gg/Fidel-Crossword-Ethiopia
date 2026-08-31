@@ -1,0 +1,7 @@
+Mixed Challenging Crossword v5 correction
+- Only lib/screens/mixed_challenging_crossword_screen.dart was corrected.
+- The screen now progresses through all 33 Fidel family challenges.
+- Each challenge uses all seven forms of one family in mixed choices.
+- Previous Family, Next Family, and Challenges navigation are available.
+- Completion keeps Play Again and Challenges.
+- Other approved learning screens and audio files were not changed.
